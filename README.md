@@ -1,138 +1,88 @@
-# Le Bureau des agents
+# 에이전트 사무실 (한국어판)
 
-**Tu dis ce que tu veux. Une équipe d'agents IA se met au travail sous tes yeux.**
+**원하는 걸 말하면, AI 에이전트 팀이 눈앞에서 일을 시작해요.**
 
-Le Bureau des agents transforme Claude Code en petit jeu vidéo en pixel art. Max, le chef de projet, lit ta demande et appelle les bons
-spécialistes. Ils arrivent par la porte, s'installent à leur bureau, et chaque bulle montre ce qu'ils font vraiment, à cet instant.
-Ce ne sont pas des animations : chaque robot est un vrai agent Claude Code, qui travaille sur ton ordinateur, avec ton abonnement.
+에이전트 사무실은 Claude Code를 작은 픽셀 아트 게임으로 바꿔 줘요. 팀장 **강지영**이 요청을 읽고 알맞은 팀원을 불러요.
+팀원들은 문으로 들어와 자기 자리에 앉고, 말풍선에는 지금 이 순간 실제로 하고 있는 일이 나와요.
+애니메이션이 아니에요. 로봇 하나하나가 진짜 Claude Code 에이전트이고, 내 컴퓨터에서 내 구독으로 일해요.
 
-![L'équipe au travail : cinq chercheurs fouillent internet en même temps, Max attend leurs rapports](docs/bureau-en-mission.gif)
+> 이 저장소는 **[Le Bureau des agents](https://github.com/devlikemasta/bureau-des-agents)**
+> ([VibesMoney](https://vibesmoney.com), MIT 라이선스)를 한국어로 옮기고 몇 가지 기능을 더한 포크예요.
+> 사무실의 설계, 픽셀 아트, 코드의 대부분은 원작자의 작업이에요. 원작 README는 [README.fr.md](README.fr.md)에 그대로 있어요.
 
-Gratuit, open source, et fait pour être amélioré par tout le monde.
+![원작 화면: 팀이 일하는 모습](docs/bureau-en-mission.gif)
+
+*(위 이미지는 원작 프랑스어판 화면이에요.)*
 
 ---
 
-## L'installer en 2 minutes (sans savoir coder)
+## 원작과 달라진 점
 
-1. Il te faut [Claude Code](https://claude.com/claude-code), installé et connecté à ton compte.
-2. Ouvre Claude Code et colle cette phrase :
+- **화면 전체 한국어화**: 메뉴, 창, 안내문, 오류 메시지, 미션 아이디어, 사무실 투어까지 모두 한국어예요.
+- **에이전트도 한국어로 일해요**: 팀장과 팀원 지시문을 한국어로 바꿔서 계획, 보고서, 결과물이 한국어로 나와요.
+- **한글 픽셀 표지판**: 리서치·코드·디자인·글쓰기·분석·팀장, 보드의 「작전」을 7×10 픽셀 한글로 직접 그렸어요.
+- **팀장 이름과 목소리**: 팀장 이름은 강지영이고, 한국어 목소리와 자막이 나와요. 음성 입력(🎙️)도 한국어로 알아들어요.
+- **내 프로젝트에서 미션 시작**: 입력창 위 「내 프로젝트 고르기」로 이미 만들고 있는 폴더를 고르면, 팀이 그 폴더 안에서 일해요.
+  팀은 여전히 그 폴더 밖으로 나갈 수 없어요.
 
-   ```
-   Installe et lance le Bureau des agents : https://github.com/devlikemasta/bureau-des-agents
-   ```
+## 설치하기
 
-3. Claude Code télécharge le bureau, l'installe et le lance. Le bureau s'ouvre dans ton navigateur, sur http://localhost:4848.
-
-Les fois suivantes, dis simplement à Claude Code « Relance le Bureau des agents ».
-
-> **Pour Claude Code** (si on t'a donné ce lien) :
-> 1. Vérifie que Node.js 22.18 ou plus récent est installé (`node -v`). Sinon, propose à la personne de l'installer depuis https://nodejs.org (version LTS).
-> 2. `git clone https://github.com/devlikemasta/bureau-des-agents.git` dans le dossier de son choix (par défaut : son dossier personnel), puis `cd bureau-des-agents` et `npm install`.
-> 3. Lance `npm start` **en arrière-plan** : c'est un petit serveur qui doit rester allumé. Il ouvre le navigateur tout seul sur http://localhost:4848.
-> 4. Dis à la personne que le bureau est prêt, qu'il tourne tant que la commande tourne, et qu'elle peut écrire sa première mission à Max.
-
-### À la main, si tu préfères
+필요한 것:
+- [Claude Code](https://claude.com/claude-code) **2.1.312 이상**, 로그인된 상태 (`claude update`, `claude auth login`)
+- [Node.js](https://nodejs.org) **22.18 이상**
 
 ```bash
-git clone https://github.com/devlikemasta/bureau-des-agents.git
+git clone https://github.com/wonhyunroh/bureau-des-agents.git
 cd bureau-des-agents
 npm install
 npm start
 ```
 
-Il te faut [Node.js](https://nodejs.org) 22.18 ou plus récent. Pour arrêter le bureau : `Ctrl + C` dans le terminal.
+브라우저가 http://localhost:4848 으로 열려요. 끄려면 터미널에서 `Ctrl + C`를 누르세요.
 
-## Ta première mission
+> **Claude Code에게 맡기기**: Claude Code를 열고 「에이전트 사무실 설치하고 실행해 줘: https://github.com/wonhyunroh/bureau-des-agents」라고 말해도 돼요.
+> Claude Code는 Node 버전을 확인하고, 저장소를 받아 `npm install` 후 `npm start`를 **백그라운드로** 실행하면 돼요.
 
-Écris à Max, au clavier ou à la voix (🎙️). Quelques idées :
+## 첫 미션
 
-- « Je lance ma marque de café. Analyse 5 concurrents, un agent par concurrent, compare leurs prix et fais-moi le site de lancement. »
-- « Fais ma veille IA de la semaine : les 5 nouveautés qui comptent pour un entrepreneur. »
-- « Écris-moi 3 posts LinkedIn sur mon activité. »
+1. 오른쪽 패널의 **「사무실 규칙」**에 나와 내 일을 적어 두세요. 팀장이 미션마다 먼저 읽어요.
+2. 입력창에 원하는 걸 적고 **시작하기**를 누르세요. 키보드나 음성(🎙️) 둘 다 돼요.
+   - 「경쟁사 5곳을 분석하고 가격을 비교해 줘」
+   - 「이번 주 AI 소식 중 사업하는 사람에게 중요한 5가지를 정리해 줘」
+   - 「내 사업에 대한 링크드인 글 3개 써 줘」
+3. 내 프로젝트에서 일을 시키려면 입력창 위 **「내 프로젝트 고르기」**로 폴더를 고르세요.
+   팀이 실제 파일을 고치니까, 시작하기 전에 git 커밋으로 백업해 두면 안전해요.
 
-Avant la première mission, remplis **« Le règlement du bureau »** (bouton dans le panneau de droite) : qui tu es, ce que fait ton
-entreprise. Max le lit avant chaque mission, et l'équipe travaille pour toi, pas pour n'importe qui.
+### 단축키
 
-![Le bureau en fin de journée](docs/bureau-soir.jpg)
-
-## Ce que tu peux faire dedans
-
-- **Cliquer sur tout.**
-  - Un robot : sa fiche, avec la mission que Max lui a donnée, chacune de ses actions et son rapport.
-  - Le tableau : le plan, qui fait quoi, et l'historique du plan.
-  - L'imprimante : les fichiers rendus par l'équipe. La bibliothèque : tes missions passées.
-  - Le serveur : Claude Code, le modèle, ton abonnement. L'horloge, la fenêtre (jour, soir, nuit)…
-- **Voir les sites créés par l'équipe dans un écran**, en version ordinateur ou téléphone, avec leur code et toutes leurs versions.
-- **Retrouver toute l'équipe** (👥) : les métiers, les outils Claude Code de chacun, et l'historique de tous les agents passés au bureau.
-- **Rejouer une mission** (`H`, puis « Rejouer ») : elle se remontre à l'identique, sans relancer l'équipe ni consommer ton abonnement.
-- **Mettre de la musique** au jukebox, écouter Max faire **la visite guidée** (`T`).
-- Et trouver les surprises : un chat, et un code secret bien connu des joueurs.
-
-![Le site créé par l'équipe, affiché dans le bureau](docs/apercu-site.jpg)
-
-### Filmer ton écran
-
-| Touche | Effet |
+| 키 | 기능 |
 |---|---|
-| `F` | Mode tournage : la caméra suit l'action toute seule. `F` ou `Échap` pour en sortir |
-| `V` | Cadre vertical 9:16, pour Instagram et TikTok |
-| `T` | Visite guidée, avec la voix de Max |
-| `C` | Caméra automatique : oui ou non |
-| `N` | Jour, soir, nuit |
-| `J` | Le jukebox |
-| `M` | Le son |
-| molette | Zoomer où tu veux (double-clic : plan large) |
+| `T` | 사무실 투어 (팀장 목소리와 자막) |
+| `F` | 촬영 모드: 카메라가 알아서 움직임을 따라가요 (`F`나 `Esc`로 끝내기) |
+| `V` | 세로 화면 9:16 (릴스·쇼츠용) |
+| `C` | 자동 카메라 켜기/끄기 |
+| `N` | 낮 / 저녁 / 밤 |
+| `J` | 주크박스 |
+| `M` | 소리 켜기/끄기 |
+| 마우스 휠 | 확대 (더블클릭하면 전체 화면) |
 
-## Ce qui se passe sur ton ordinateur
+## 내 컴퓨터에서 일어나는 일
 
-- **Tout reste chez toi.** Le bureau n'écoute que sur ton ordinateur (127.0.0.1), et aucun site web ne peut lancer ton équipe à ta place.
-- **Max est une vraie séance Claude Code**, lancée sans fenêtre dans le dossier de la mission (`~/Documents/Bureau des agents/Missions/`).
-  Son équipe, ce sont de vrais sous-agents Claude Code, chacun avec seulement les outils de son métier.
-- **L'équipe ne sort pas du dossier de la mission** (mode restreint de Claude Code) : ni tes réglages ni tes autres agents ne s'invitent.
-- **Les actions risquées te sont soumises** : pour une commande sensible, l'agent lève la main et tu réponds Oui ou Non.
-- **Les sites créés s'affichent dans un bac à sable** : ils ne peuvent ni lire le bureau, ni parler à Claude Code.
-- **Le bureau reste léger** : environ une milliseconde de dessin par image, rien quand l'onglet est caché.
-- **Ça consomme ton abonnement Claude**, comme si tu demandais le travail à Claude Code toi-même. Une mission de 7 agents a pris
-  2 à 3 % de la fenêtre de 5 heures d'un abonnement, lors de nos essais.
+- **모든 게 내 컴퓨터 안에서 돌아가요.** 사무실은 내 컴퓨터(127.0.0.1)에서만 접속을 받아요.
+- **팀장은 진짜 Claude Code 세션**이에요. 팀원들은 진짜 Claude Code 서브에이전트이고, 각자 자기 일에 필요한 도구만 써요.
+- **팀은 작업 폴더 밖으로 못 나가요** (`--restricted` 모드). 미션 폴더는 기본적으로 `~/Documents/Bureau des agents/Missions/`에 만들어져요.
+- **위험한 작업은 먼저 물어봐요.** 민감한 명령을 실행하기 전에 에이전트가 손을 들고, 예/아니요로 답하면 돼요.
+- **내 Claude 구독 사용량을 써요.** 직접 Claude Code에게 일을 시키는 것과 같아요.
 
-Testé sur macOS. Sur Windows et Linux, ça devrait marcher : dis-nous si ce n'est pas le cas (onglet Issues).
+## 출처와 고마운 분들
 
-## L'améliorer avec nous
+- **원작**: [Le Bureau des agents](https://github.com/devlikemasta/bureau-des-agents) by [VibesMoney](https://vibesmoney.com) (MIT).
+  원작은 [Pixel Agents](https://github.com/pablodelucca/pixel-agents)와 [claude-office](https://github.com/paulrobello/claude-office)에서 영감을 받았어요.
+- **한국어 목소리**: [ElevenLabs](https://elevenlabs.io) 목소리 라이브러리의 「Jisoo」로 만든 녹음이에요 (`public/voice/ko/`).
+- **원작 프랑스어 목소리와 음악**: 원작에 포함된 파일 그대로예요. 음악은 원작자가 [ElevenLabs Music](https://elevenlabs.io/music)과 Google Lyria로
+  작곡했고, 원작 목소리는 ElevenLabs의 「Léo」예요.
+- **효과음**: [ZzFX](https://github.com/KilledByAPixel/ZzFX) (MIT). **글꼴**: Pixelify Sans, Plus Jakarta Sans (OFL).
 
-Le Bureau des agents est fait pour grandir avec ses utilisateurs : une idée, un bug, un nouveau meuble, un nouveau métier, une traduction…
-Tout est expliqué, même si tu débutes, dans [CONTRIBUTING.md](CONTRIBUTING.md).
+## 라이선스
 
-Le plus simple : ouvre Claude Code dans le dossier du bureau et dis-lui ce que tu veux ajouter. Le fichier [CLAUDE.md](CLAUDE.md) lui
-explique comment le projet est fait.
-
-## Sous le capot
-
-- **`server/`** : un petit serveur Node. Il lance `claude -p` (JSON ligne par ligne), passe l'équipe avec `--agents`, travaille en
-  `--restricted`, et traduit chaque appel d'outil (`WebSearch`, `WebFetch`, `Write`, `Agent`…) en action dans le bureau.
-- **`src/engine/`** : le bureau en Canvas 2D, sur une image de 352 × 256 pixels. Tout le pixel art est dessiné en code, sans image externe.
-- **`src/ui/`** : l'interface (React) : la boîte de dialogue de Max, les fenêtres, le panneau de l'équipe.
-
-Pour développer : `npm run dev` (http://localhost:5174, rechargement à chaud). `npm run check` vérifie les types.
-
-## Merci
-
-- **La musique** : des morceaux originaux composés pour le bureau avec [ElevenLabs Music](https://elevenlabs.io/music) et Google Lyria.
-- **La voix de Max** : « Léo », une voix de la bibliothèque [ElevenLabs](https://elevenlabs.io).
-- **Les bruitages** : [ZzFX](https://github.com/KilledByAPixel/ZzFX) (MIT). **Les polices** : Pixelify Sans et Plus Jakarta Sans (licence OFL).
-- **L'inspiration** : [Pixel Agents](https://github.com/pablodelucca/pixel-agents) et [claude-office](https://github.com/paulrobello/claude-office)
-  (MIT). Le code et les dessins du Bureau des agents sont écrits à neuf.
-
-Licence MIT (voir [LICENSE](LICENSE)). Un projet [VibesMoney](https://vibesmoney.com) : on t'apprend à créer des agents IA qui travaillent pour toi.
-
----
-
-## In English
-
-**The Agents' Office** turns Claude Code into a pixel-art game. You give Max, the project lead, a task. He calls real Claude Code
-subagents (research, code, design, writing, analysis), each with only the tools of its trade. Every agent walks to its desk, shows what
-it is actually doing, and delivers its report; you read the results, even the websites they build, right inside the office.
-
-It runs locally with your own Claude Code subscription. Requirements: Node.js 22.18+ and Claude Code.
-Easiest install: open Claude Code and paste `Install and run the Agents' Office: https://github.com/devlikemasta/bureau-des-agents`.
-Manual install: `git clone`, `npm install`, `npm start`, then open http://localhost:4848. The interface is in French for now: an English
-translation is a great first contribution (see [CONTRIBUTING.md](CONTRIBUTING.md)).
+MIT 라이선스예요 ([LICENSE](LICENSE)). 원작자의 저작권 표시를 그대로 유지하고, 한국어판에서 바꾼 부분의 저작권 줄을 더했어요.

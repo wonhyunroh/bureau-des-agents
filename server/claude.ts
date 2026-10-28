@@ -134,14 +134,14 @@ export class ClaudeProcess {
       type: 'control_response',
       response: {
         subtype: 'success', request_id: requestId,
-        response: allow ? { behavior: 'allow', updatedInput: input ?? {} } : { behavior: 'deny', message: 'Le patron a dit non. Trouve une autre façon de faire, ou demande-lui.' },
+        response: allow ? { behavior: 'allow', updatedInput: input ?? {} } : { behavior: 'deny', message: '대표님이 거절했어요. 다른 방법을 찾거나 대표님께 물어보세요.' },
       },
     });
   }
 
   /** Une demande de contrôle qu'on ne sait pas traiter : on répond tout de suite pour ne pas le bloquer. */
   refuseControl(requestId: string) {
-    this.write({ type: 'control_response', response: { subtype: 'error', request_id: requestId, error: 'Non pris en charge par le Bureau des agents' } });
+    this.write({ type: 'control_response', response: { subtype: 'error', request_id: requestId, error: '에이전트 사무실에서 지원하지 않는 요청이에요' } });
   }
 
   interrupt() {

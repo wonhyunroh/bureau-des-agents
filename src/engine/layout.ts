@@ -41,12 +41,12 @@ export interface Zone { role: Role; label: string; x: number; y: number; w: numb
 
 /** Les coins du bureau (le tapis au sol et l'étiquette). */
 export const ZONES: Zone[] = [
-  { role: 'recherche', label: 'Recherche', x: 1, y: 3, w: 6, h: 6 },
-  { role: 'code', label: 'Atelier code', x: 15, y: 3, w: 6, h: 3 },
-  { role: 'design', label: 'Studio design', x: 15, y: 6, w: 6, h: 3 },
-  { role: 'redaction', label: 'Rédaction', x: 1, y: 10, w: 6, h: 3 },
-  { role: 'analyse', label: 'Analyse', x: 15, y: 10, w: 4, h: 3 },
-  { role: 'chef', label: 'Max, chef de projet', x: 9, y: 6, w: 4, h: 3 },
+  { role: 'recherche', label: '리서치', x: 1, y: 3, w: 6, h: 6 },
+  { role: 'code', label: '코드 작업실', x: 15, y: 3, w: 6, h: 3 },
+  { role: 'design', label: '디자인 스튜디오', x: 15, y: 6, w: 6, h: 3 },
+  { role: 'redaction', label: '글쓰기', x: 1, y: 10, w: 6, h: 3 },
+  { role: 'analyse', label: '분석', x: 15, y: 10, w: 4, h: 3 },
+  { role: 'chef', label: '강지영, 팀장', x: 9, y: 6, w: 4, h: 3 },
 ];
 
 const furn: Furn[] = [];

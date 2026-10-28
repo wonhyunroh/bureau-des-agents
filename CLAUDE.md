@@ -1,7 +1,7 @@
 # Le Bureau des agents : notes pour Claude Code
 
 Tu travailles sur un logiciel open source : un bureau en pixel art où l'on regarde de vrais sous-agents Claude Code travailler.
-Lis ce fichier avant de modifier le code. Pour installer et lancer le bureau, suis la section « Pour Claude Code » du README.
+Lis ce fichier avant de modifier le code. Pour installer et lancer le bureau, suis la section « 설치하기 » du README (l'original français est dans README.fr.md).
 
 ## Les commandes
 
@@ -37,7 +37,7 @@ fournit le rythme de la musique (voir la boucle de `Office.tsx`).
 
 ## Les règles
 
-- **Français, tutoiement, phrases courtes** dans tout ce que l'utilisateur lit. Le bureau est fait pour des débutants.
+- **Coréen (해요체), phrases courtes** dans tout ce que l'utilisateur lit, y compris les consignes des agents (`server/team.ts`) : c'est la version coréenne. Le chef s'appelle 강지영. Les commentaires du code restent en français. Le bureau est fait pour des débutants.
 - **Jamais de chemin complet ni de nom d'utilisateur à l'écran** : `tidy()` (`src/ui/tidy.ts`) et `tilde()` (`src/ui/format.ts`).
 - **Léger** : la boucle dessine au plus 24 images par seconde en mission, 8 au repos, rien quand l'onglet est caché ; environ une
   milliseconde par image. Pas de 3D, pas de bibliothèque lourde.

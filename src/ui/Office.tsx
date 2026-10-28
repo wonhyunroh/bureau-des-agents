@@ -194,7 +194,7 @@ function LiveBadge() {
   const busy = useOffice((s) => s.busySince !== null);
   const replaying = useOffice((s) => s.replaying);
   if (!filming || !busy) return null;
-  return <div className="live-badge"><i />{replaying ? 'REDIFFUSION' : 'EN DIRECT'}</div>;
+  return <div className="live-badge"><i />{replaying ? '다시 재생' : '생방송'}</div>;
 }
 
 function subscribeRoster(cb: () => void) {
@@ -212,7 +212,7 @@ interface View {
 }
 
 /** Une bulle plus courte : sans guillemets, le sujet après deux-points. */
-const short = (label: string) => label.replace(/\s«\s?(.+?)\s?»/, ' : $1');
+const short = (label: string) => label.replace(/\s«\s?(.+?)\s?»/, ' : $1').replace(/「\s?(.+?)\s?」/, '$1');
 
 function Bubbles() {
   const version = useSyncExternalStore(subscribeRoster, () => world.rosterVersion);
@@ -255,7 +255,7 @@ function Bubbles() {
     const isChef = id === 'chef';
     const a = isChef ? null : agents[id];
     const role = isChef ? 'chef' : a?.role ?? actor?.role ?? 'renfort';
-    const base = { name: isChef ? 'Max' : a?.name ?? actor?.name ?? '', color: ROLES[role].color };
+    const base = { name: isChef ? '강지영' : a?.name ?? actor?.name ?? '', color: ROLES[role].color };
     // l'équipe de démonstration de la visite guidée : juste les prénoms
     if (!isChef && !a && actor) return { ...base, mode: filming ? 'none' : 'tag' };
     const ask = askOf(id);
@@ -265,7 +265,7 @@ function Bubbles() {
       if (chef.typing) return { ...base, mode: 'full', text: lastSentence(chef.typing, 70) };
       if (chef.say && now - chef.sayAt < 6000) return { ...base, mode: 'full', text: firstSentence(chef.say, 70) };
       if (chef.act && now - chef.act.at < 5000) return { ...base, mode: 'full', text: short(chef.act.label), icon: ICON[chef.act.kind] };
-      if (busy && working > 0) return { ...base, mode: 'full', text: `J’attends l’équipe : ${order.length - working} rapport${order.length - working > 1 ? 's' : ''} sur ${order.length}`, icon: '⏳' };
+      if (busy && working > 0) return { ...base, mode: 'full', text: `팀을 기다리는 중: 보고서 ${order.length - working}/${order.length}`, icon: '⏳' };
       if (busy) return { ...base, mode: 'full', text: '…' };
       return { ...base, mode: filming ? 'none' : 'tag' };
     }
@@ -335,10 +335,10 @@ function AskBubble({ ask, name }: { ask: AskView; name: string }) {
       <span className="bubble-text">{short(ask.label)}</span>
       {ask.full ? (
         <span className="ask-actions">
-          <button className="yes" onClick={() => answer(true)}>Oui</button>
-          <button className="no" onClick={() => answer(false)}>Non</button>
+          <button className="yes" onClick={() => answer(true)}>예</button>
+          <button className="no" onClick={() => answer(false)}>아니요</button>
         </span>
-      ) : <span className="ask-more">Détails en bas de l’écran ↓</span>}
+      ) : <span className="ask-more">자세한 내용은 화면 아래에 ↓</span>}
     </div>
   );
 }

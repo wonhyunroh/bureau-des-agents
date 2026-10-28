@@ -1,7 +1,8 @@
 // Qu'y a-t-il sous la souris ? Un robot, le chat, un meuble, le tableau, l'horloge… Le plus en avant gagne.
 import { ROLES } from '../../shared/activity.ts';
 import type { Role } from '../../shared/protocol.ts';
-import { textWidth } from './font.ts';
+import { textHeight, textWidth } from './font.ts';
+import { SIGN as ZONE_SIGN } from './room.ts';
 import { furniturePlacement } from './furniture.ts';
 import { BOARD, CLOCK, DOOR, FURNITURE, NEON, POSTER, T, WINDOWS, ZONES } from './layout.ts';
 import type { World } from './world.ts';
@@ -11,26 +12,25 @@ export type Hit =
   | { kind: 'cat'; label: string }
   | { kind: 'object'; id: string; label: string; role?: Role };
 
-const ZONE_SIGN: Record<string, string> = { recherche: 'RECHERCHE', code: 'CODE', design: 'DESIGN', redaction: 'RÉDACTION', analyse: 'ANALYSE', chef: 'CHEF' };
 
 function furnitureLabel(id: string, kind: string, role?: Role): string {
   switch (kind) {
-    case 'desk': return `Un bureau du coin ${ROLES[role ?? 'renfort'].label}`;
-    case 'chair': return `Un poste du coin ${ROLES[role ?? 'renfort'].label}`;
-    case 'chefDesk': return 'Le bureau de Max : les rapports de l’équipe';
-    case 'chefChair': return 'Le fauteuil de Max';
-    case 'rack': return 'Le serveur : Claude Code et ton abonnement';
-    case 'printer': return 'L’imprimante : les rendus de la mission';
-    case 'cooler': return 'La fontaine à eau';
-    case 'easel': return 'Le chevalet du studio design';
-    case 'plantBig': case 'plantTall': case 'plantSmall': return 'Une plante (elle aime qu’on la chatouille)';
-    case 'sofa': return 'Le canapé (la place préférée du chat)';
-    case 'tableLow': return 'La table basse';
-    case 'lamp': return 'Un lampadaire (clique pour l’éteindre)';
-    case 'shelf': return 'Les archives : les missions passées';
-    case 'coffee': return 'La machine à café';
-    case 'bin': return 'La corbeille';
-    case 'jukebox': return 'Le jukebox';
+    case 'desk': return `${ROLES[role ?? 'renfort'].label} 코너의 책상`;
+    case 'chair': return `${ROLES[role ?? 'renfort'].label} 코너의 자리`;
+    case 'chefDesk': return '강지영의 책상: 팀의 보고서';
+    case 'chefChair': return '강지영의 의자';
+    case 'rack': return '서버: Claude Code와 구독';
+    case 'printer': return '프린터: 미션 결과물';
+    case 'cooler': return '정수기';
+    case 'easel': return '디자인 스튜디오의 이젤';
+    case 'plantBig': case 'plantTall': case 'plantSmall': return '화분 (간질이면 좋아해요)';
+    case 'sofa': return '소파 (고양이가 제일 좋아하는 자리)';
+    case 'tableLow': return '낮은 테이블';
+    case 'lamp': return '스탠드 조명 (클릭하면 꺼져요)';
+    case 'shelf': return '기록 보관함: 지난 미션';
+    case 'coffee': return '커피 머신';
+    case 'bin': return '휴지통';
+    case 'jukebox': return '주크박스';
   }
   return id;
 }
@@ -48,10 +48,10 @@ export function hitAt(world: World, x: number, y: number): Hit | null {
   for (const a of actors) {
     const ay = a.seated && a.seat ? a.seat.y : a.y;
     if (a.alpha > 0.3 && x >= a.x - 7 && x <= a.x + 7 && y >= ay - 21 && y <= ay + 1) {
-      return { kind: 'actor', id: a.id, label: a.id === 'chef' ? 'Max, le chef de projet' : `${a.name} · ${ROLES[a.role].label}` };
+      return { kind: 'actor', id: a.id, label: a.id === 'chef' ? '강지영, 팀장' : `${a.name} · ${ROLES[a.role].label}` };
     }
   }
-  if (world.cat.hit(x, y)) return { kind: 'cat', label: 'Pixel, le chat du bureau' };
+  if (world.cat.hit(x, y)) return { kind: 'cat', label: 'Pixel, 사무실 고양이' };
   // les meubles
   for (const p of placed) {
     if (!inRect(x, y, { x: p.x + 1, y: p.y + 1, w: p.w - 2, h: p.h - 2 })) continue;
@@ -59,16 +59,17 @@ export function hitAt(world: World, x: number, y: number): Hit | null {
     return { kind: 'object', id: p.f.id, label: furnitureLabel(p.f.id, p.f.kind, p.f.role), role: p.f.role };
   }
   // le mur du fond et le sol
-  if (inRect(x, y, { x: BOARD.x - 2, y: BOARD.y - 2, w: BOARD.w + 4, h: BOARD.h + 6 })) return { kind: 'object', id: 'board', label: 'Le tableau : le plan de Max' };
-  if (inRect(x, y, { x: CLOCK.x - 1, y: CLOCK.y - 1, w: 16, h: 16 })) return { kind: 'object', id: 'clock', label: 'L’horloge' };
-  if (inRect(x, y, { x: NEON.x, y: NEON.y - 3, w: 26, h: 26 })) return { kind: 'object', id: 'neon', label: 'Le néon VibesMoney (clique pour changer sa couleur)' };
-  if (inRect(x, y, POSTER)) return { kind: 'object', id: 'poster', label: 'L’affiche des objectifs' };
-  for (const w of WINDOWS) if (inRect(x, y, { x: w.x - 3, y: w.y - 3, w: w.w + 6, h: w.h + 8 })) return { kind: 'object', id: 'window', label: 'La fenêtre (jour, soir ou nuit)' };
-  if (inRect(x, y, DOOR)) return { kind: 'object', id: 'door', label: 'La porte : c’est par là qu’arrive l’équipe' };
+  if (inRect(x, y, { x: BOARD.x - 2, y: BOARD.y - 2, w: BOARD.w + 4, h: BOARD.h + 6 })) return { kind: 'object', id: 'board', label: '보드: 강지영의 계획' };
+  if (inRect(x, y, { x: CLOCK.x - 1, y: CLOCK.y - 1, w: 16, h: 16 })) return { kind: 'object', id: 'clock', label: '시계' };
+  if (inRect(x, y, { x: NEON.x, y: NEON.y - 3, w: 26, h: 26 })) return { kind: 'object', id: 'neon', label: 'VibesMoney 네온사인 (클릭하면 색이 바뀌어요)' };
+  if (inRect(x, y, POSTER)) return { kind: 'object', id: 'poster', label: '목표 포스터' };
+  for (const w of WINDOWS) if (inRect(x, y, { x: w.x - 3, y: w.y - 3, w: w.w + 6, h: w.h + 8 })) return { kind: 'object', id: 'window', label: '창문 (낮, 저녁, 밤)' };
+  if (inRect(x, y, DOOR)) return { kind: 'object', id: 'door', label: '문: 팀이 이리로 들어와요' };
   for (const z of ZONES) {
-    const w = textWidth(ZONE_SIGN[z.role] ?? z.label) + 10;
-    const sx = z.x * T + 4, sy = z.role === 'chef' ? (z.y + z.h) * T - 12 : z.y * T + 3;
-    if (inRect(x, y, { x: sx, y: sy, w, h: 9 })) return { kind: 'object', id: `zone:${z.role}`, label: `Le coin ${ROLES[z.role].label} : qui y travaille, avec quels outils`, role: z.role };
+    const text = ZONE_SIGN[z.role] ?? z.label;
+    const w = textWidth(text) + 10, h = textHeight(text) + 4;
+    const sx = z.x * T + 4, sy = z.role === 'chef' ? (z.y + z.h) * T - h - 3 : z.y * T + 3;
+    if (inRect(x, y, { x: sx, y: sy, w, h })) return { kind: 'object', id: `zone:${z.role}`, label: `${ROLES[z.role].label} 코너: 누가 어떤 도구로 일하는지`, role: z.role };
   }
   return null;
 }

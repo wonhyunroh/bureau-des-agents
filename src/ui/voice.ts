@@ -29,7 +29,7 @@ export function useDictation(getBase: () => string, onText: (text: string) => vo
     setProblem(null);
     if (!SR) { setProblem('absent'); return; }
     const r = new SR();
-    r.lang = 'fr-FR';
+    r.lang = 'ko-KR';
     r.interimResults = true;
     r.continuous = true;
     const base = getBase().trim();
@@ -55,7 +55,7 @@ export function useDictation(getBase: () => string, onText: (text: string) => vo
 /** Ce qu'on affiche quand la dictée du navigateur ne marche pas. */
 export function dictationHelp(problem: string) {
   if (problem === 'not-allowed' || problem === 'service-not-allowed') {
-    return 'Le micro est bloqué pour cette page. Autorise-le dans la barre d’adresse, ou utilise la dictée du Mac : appuie deux fois sur la touche fn (ou 🎤), puis parle.';
+    return '이 페이지에서 마이크가 차단돼 있어요. 주소창에서 허용하거나, Mac 받아쓰기를 써 보세요. fn 키(또는 🎤)를 두 번 누르고 말하면 돼요.';
   }
-  return 'Ce navigateur ne fait pas la dictée (Brave la bloque). Utilise la dictée du Mac : appuie deux fois sur la touche fn (ou 🎤), puis parle. Safari et Chrome la font aussi.';
+  return '이 브라우저는 음성 입력을 지원하지 않아요(Brave는 차단해요). Mac 받아쓰기를 써 보세요. fn 키(또는 🎤)를 두 번 누르고 말하면 돼요. Safari와 Chrome에서도 돼요.';
 }

@@ -6,7 +6,7 @@ import type {
   ActKind, ClaudeInfo, ClientMsg, FileInfo, MissionInfo, MissionStats, OfficeEvent, PlanItem, Quota, Role, ServerMsg, Settings, TeamEntry, VersionInfo,
 } from '../../shared/protocol.ts';
 import { sfx } from '../audio/sfx.ts';
-import { say } from '../audio/voice.ts';
+import { onSubtitle, say } from '../audio/voice.ts';
 import { bus } from './bus.ts';
 
 export interface ActView { id: string; kind: ActKind; label: string; detail: string; at: number; ok?: boolean }
@@ -91,10 +91,14 @@ interface S {
   music: { playing: boolean; index: number; volume: number };
   /** la voix de Max (ElevenLabs) */
   voiceOn: boolean;
+  /** le projet existant où lancer la prochaine mission (null : un dossier neuf) */
+  project: string | null;
   /** en mode tournage, la caméra suit l'action toute seule */
   cameraAuto: boolean;
   /** la visite guidée en cours (le texte que Max dit) */
   tour: { step: number; text: string } | null;
+  /** le sous-titre de la réplique de Max en cours */
+  subtitle: string | null;
   historyOpen: boolean;
   settingsOpen: boolean;
   vertical: boolean;
@@ -153,8 +157,10 @@ export const useOffice = create<S>((set, get) => ({
   planHistory: [],
   music: { playing: false, index: 0, volume: 0.55 },
   voiceOn: pref('voice', true),
+  project: pref<string | null>('project', null),
   cameraAuto: pref('cameraAuto', true),
   tour: null,
+  subtitle: null,
   historyOpen: false,
   settingsOpen: false,
   vertical: pref('vertical', false),
@@ -226,6 +232,9 @@ export const useOffice = create<S>((set, get) => ({
       case 'toast':
         get().toast(m.kind, m.text);
         break;
+      case 'picked_folder':
+        if (m.folder) { set({ project: m.folder }); savePref('project', m.folder); }
+        break;
       case 'replay':
         // géré par le lecteur (net/replay.ts)
         break;
@@ -238,13 +247,13 @@ export const useOffice = create<S>((set, get) => ({
       const line: FeedLine = { id: ++feedId, at, who, text, kind };
       return [...get().feed, line].slice(-MAX_FEED);
     };
-    const agentName = (who: string) => (who === 'chef' ? 'Max' : s.agents[who]?.name ?? 'Un agent');
+    const agentName = (who: string) => (who === 'chef' ? '강지영' : s.agents[who]?.name ?? '에이전트');
     switch (ev.k) {
       case 'start': {
         const first = s.feed.length === 0;
         set({
           chef: { ...s.chef, say: '', typing: '', thinkingAt: at }, final: null, showFinal: false,
-          busySince: at, feed: feed('toi', ev.text, 'user'),
+          busySince: at, feed: feed('나', ev.text, 'user'),
         });
         if (live && !first) sfx('send');
         if (live) void say('parti');
@@ -260,7 +269,7 @@ export const useOffice = create<S>((set, get) => ({
         else if (s.agents[ev.who]) set({ agents: { ...s.agents, [ev.who]: { ...s.agents[ev.who], say: ev.text, sayAt: at } } });
         break;
       case 'say':
-        if (ev.who === 'chef') set({ chef: { ...s.chef, say: ev.text, sayAt: at, typing: '' }, feed: feed('Max', ev.text, 'chef') });
+        if (ev.who === 'chef') set({ chef: { ...s.chef, say: ev.text, sayAt: at, typing: '' }, feed: feed('강지영', ev.text, 'chef') });
         else if (s.agents[ev.who]) set({ agents: { ...s.agents, [ev.who]: { ...s.agents[ev.who], say: ev.text, sayAt: at } } });
         break;
       case 'plan':
@@ -276,7 +285,7 @@ export const useOffice = create<S>((set, get) => ({
         const stats = { ...s.stats };
         countStats(stats, ev);
         const firstOfRound = !s.order.some((id) => s.agents[id]?.status === 'working' || s.agents[id]?.status === 'reporting');
-        set({ agents: { ...s.agents, [ev.id]: a }, order: [...s.order, ev.id], stats, feed: feed('Max', `appelle ${ev.name} : ${ev.task}`, 'hire') });
+        set({ agents: { ...s.agents, [ev.id]: a }, order: [...s.order, ev.id], stats, feed: feed('강지영', `${ev.name} 호출: ${ev.task}`, 'hire') });
         if (live) sfx('spawn');
         if (live && firstOfRound) void say('equipe');
         break;
@@ -303,7 +312,7 @@ export const useOffice = create<S>((set, get) => ({
       case 'report': {
         const a = s.agents[ev.who];
         if (!a) break;
-        set({ agents: { ...s.agents, [ev.who]: { ...a, report: ev.text, status: 'reporting' } }, feed: feed(a.name, 'rend son rapport à Max', 'report') });
+        set({ agents: { ...s.agents, [ev.who]: { ...a, report: ev.text, status: 'reporting' } }, feed: feed(a.name, '강지영에게 보고서 제출', 'report') });
         if (live) sfx('paper');
         break;
       }
@@ -315,7 +324,7 @@ export const useOffice = create<S>((set, get) => ({
       }
       case 'file': {
         const files = [...s.files.filter((f) => f.path !== ev.file.path), ev.file].sort((a, b) => a.at - b.at);
-        set({ files, feed: ev.isNew ? feed(agentName(ev.file.by), `a rangé ${ev.file.name}`, 'file') : get().feed });
+        set({ files, feed: ev.isNew ? feed(agentName(ev.file.by), `${ev.file.name} 정리 완료`, 'file') : get().feed });
         if (live && ev.isNew) sfx('print');
         break;
       }
@@ -335,7 +344,7 @@ export const useOffice = create<S>((set, get) => ({
         const workMs = s.workMs + (s.busySince ? Math.max(0, at - s.busySince) : 0);
         set({
           final: { ok: ev.ok, text: ev.text, ms: ev.ms, stopped: ev.stopped, at }, busySince: null, workMs, asks: {},
-          showFinal: false, feed: feed('Max', ev.ok ? 'Mission accomplie !' : ev.stopped ? 'Mission arrêtée.' : 'La mission s’est mal terminée.', 'end'),
+          showFinal: false, feed: feed('강지영', ev.ok ? '미션 완료!' : ev.stopped ? '미션을 멈췄어요.' : '미션이 잘 끝나지 않았어요.', 'end'),
         });
         if (live) sfx(ev.ok ? 'done' : 'error');
         if (live && ev.ok) setTimeout(() => { void say('accomplie', true); }, 900);
@@ -344,7 +353,7 @@ export const useOffice = create<S>((set, get) => ({
         break;
       }
       case 'error':
-        set({ feed: feed('Max', ev.message, 'error') });
+        set({ feed: feed('강지영', ev.message, 'error') });
         if (live) get().toast('error', ev.message);
         break;
     }
@@ -354,3 +363,5 @@ export const useOffice = create<S>((set, get) => ({
 
 /** Les membres de l'équipe, dans l'ordre où ils sont arrivés. */
 export const teamList = (s: S) => s.order.map((id) => s.agents[id]).filter(Boolean);
+
+onSubtitle((subtitle) => useOffice.setState({ subtitle }));

@@ -143,7 +143,7 @@ export class World {
     this.assignments = [];
     this.planSize = -1;
     const p = SPOTS.receptionPx;
-    this.actors.set('chef', new Actor('chef', 'chef', 'Max', p.x, p.y));
+    this.actors.set('chef', new Actor('chef', 'chef', '강지영', p.x, p.y));
     this.rosterChanged();
   }
 

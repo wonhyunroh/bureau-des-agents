@@ -2,7 +2,7 @@
 // ville (le ciel suit l'heure), le néon VibesMoney, le tableau du plan, l'horloge et la porte.
 // Tout ça ne bouge pas : c'est dessiné une fois, puis recopié à chaque image.
 import { ROLES } from '../../shared/activity.ts';
-import { pixelText, textWidth } from './font.ts';
+import { pixelText, textHeight, textWidth } from './font.ts';
 import { BOARD, CLOCK, H, NEON, T, W, WINDOWS, ZONES } from './layout.ts';
 import { g2d, hline, lighten, makeCanvas, mix, P, px, rect, rng, vline, type G } from './pixels.ts';
 
@@ -137,11 +137,10 @@ function whiteboard(g: G) {
   rect(g, x + 26, y + h + 1, 5, 1, '#2b2836');
   rect(g, x + w - 18, y + h + 1, 6, 2, '#e9e5ef');
   // le titre, au feutre orange
-  pixelText(g, 'LE PLAN', x + 4, y + 3, P.orangeDark);
-  hline(g, x + 4, y + 9, textWidth('LE PLAN'), P.orange);
+  pixelText(g, '작전', x + 4, y + 1, P.orangeDark);
 }
 
-const SIGN: Record<string, string> = { recherche: 'RECHERCHE', code: 'CODE', design: 'DESIGN', redaction: 'RÉDACTION', analyse: 'ANALYSE', chef: 'CHEF' };
+export const SIGN: Record<string, string> = { recherche: '리서치', code: '코드', design: '디자인', redaction: '글쓰기', analyse: '분석', chef: '팀장' };
 
 /** Les écriteaux posés au coin de chaque tapis, avec le nombre d'agents au travail dans le coin. */
 export function signs(g: G, busy: (role: string) => number) {
@@ -149,10 +148,10 @@ export function signs(g: G, busy: (role: string) => number) {
     const n = busy(z.role);
     const label = (SIGN[z.role] ?? z.label.toUpperCase()) + (n > 0 && z.role !== 'chef' ? ` ${n}` : '');
     const color = ROLES[z.role].color;
-    const w = textWidth(label) + 6;
-    const x = z.x * T + 4, y = z.role === 'chef' ? (z.y + z.h) * T - 12 : z.y * T + 3;
-    rect(g, x + 1, y, w - 2, 9, '#120f19');
-    rect(g, x, y + 1, w, 7, '#120f19');
+    const w = textWidth(label) + 6, h = textHeight(label) + 4;
+    const x = z.x * T + 4, y = z.role === 'chef' ? (z.y + z.h) * T - h - 3 : z.y * T + 3;
+    rect(g, x + 1, y, w - 2, h, '#120f19');
+    rect(g, x, y + 1, w, h - 2, '#120f19');
     hline(g, x + 1, y, w - 2, mix(color, '#120f19', 0.45));
     pixelText(g, label, x + 3, y + 2, lighten(color, 0.15));
   }

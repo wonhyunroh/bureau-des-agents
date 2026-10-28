@@ -6,7 +6,7 @@
 // une fois finie (retouches) : la même séance reprend.
 import { execFile } from 'node:child_process';
 import { existsSync, readFileSync, renameSync, watch, writeFileSync, type FSWatcher } from 'node:fs';
-import { appendFile, copyFile, mkdir, readdir, readFile, rename, stat, unlink, writeFile } from 'node:fs/promises';
+import { appendFile, copyFile, mkdir, readdir, readFile, realpath, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { countStats, emptyStats } from '../shared/activity.ts';
@@ -16,29 +16,29 @@ import { agentsJson, ALWAYS_ALLOWED, chefPrompt, SESSION_TOOLS } from './team.ts
 
 const RULES_FILE = 'Règlement du bureau.md';
 
-const RULES_TEMPLATE = `# Le règlement du bureau
+const RULES_TEMPLATE = `# 사무실 규칙
 
-Max, le chef de projet, lit ce fichier avant chaque mission. Écris-y ce que l'équipe doit savoir
-sur toi, avec tes mots, comme si tu briefais de nouveaux collègues.
+팀장 강지영은 미션을 시작하기 전에 항상 이 파일을 읽어요. 팀이 대표님에 대해 알아야 할 것을
+새 동료들에게 설명하듯 편하게 적어 주세요.
 
-## Qui je suis
-<!-- Par exemple : « Je m'appelle Alex, je suis coach sportif à Lyon. Je vends des programmes en ligne à des femmes de 30 à 45 ans. » -->
+## 저는 누구인가요
+<!-- 예: "저는 서울에 사는 피트니스 코치 지민이에요. 30~45세 여성을 위한 온라인 운동 프로그램을 판매해요." -->
 
-## Comment travailler pour moi
-- Réponds-moi en français, simplement.
-- Va droit au but : je veux des livrables prêts à servir.
-- Range tout dans le dossier de la mission, avec des noms de fichiers clairs.
+## 저를 위해 일하는 방법
+- 한국어로, 쉽게 답해 주세요.
+- 핵심만 말해 주세요: 바로 쓸 수 있는 결과물이 필요해요.
+- 모든 파일은 미션 폴더에 알기 쉬운 이름으로 정리해 주세요.
 `;
 
-const README = `# Le Bureau des agents
+const README = `# 에이전트 사무실
 
-Ici travaille ton équipe d'agents IA (des agents Claude Code).
+여기서 대표님의 AI 에이전트 팀(Claude Code 에이전트)이 일해요.
 
-- « Règlement du bureau.md » : ce que l'équipe doit savoir sur toi. Max, le chef, le lit avant chaque mission.
-- « Missions » : un dossier par mission. Tout ce que l'équipe produit (rapports, pages web, textes) y est rangé.
+- "Règlement du bureau.md": 사무실 규칙이에요. 팀이 대표님에 대해 알아야 할 것을 적어 두면, 팀장 강지영이 미션마다 읽어요.
+- "Missions": 미션마다 폴더가 하나씩 있어요. 팀이 만든 모든 것(보고서, 웹 페이지, 글)이 여기에 정리돼요.
 
-Le dossier caché « .bureau » garde l'état du bureau et l'enregistrement de chaque mission, pour la rejouer.
-Tu peux le supprimer pour tout recommencer.
+숨김 폴더 ".bureau"에는 사무실 상태와 각 미션의 기록이 저장돼 있어서 다시 재생할 수 있어요.
+처음부터 다시 시작하고 싶다면 이 폴더를 지워도 돼요.
 `;
 
 const DEFAULT_SETTINGS: Settings = { chefModel: 'sonnet', teamModel: 'sonnet', permission: 'auto' };
@@ -87,7 +87,7 @@ function titleOf(prompt: string) {
   const first = prompt.replace(/\s+/g, ' ').trim().split(/(?<=[.!?])\s/)[0] ?? '';
   let t = first.replace(/[.!?:;,]+$/, '');
   if (t.length > 46) t = t.slice(0, 46).replace(/\s+\S*$/, '') + '…';
-  return t ? t[0].toUpperCase() + t.slice(1) : 'Mission';
+  return t ? t[0].toUpperCase() + t.slice(1) : '미션';
 }
 
 const cleanName = (s: string) => s.replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\.+/, '');
@@ -171,23 +171,26 @@ export class Bureau {
   private mission(id: string) { return this.state.missions.find((m) => m.id === id) ?? null; }
 
   // ── Une nouvelle mission ──
-  async start(prompt: string) {
+  async start(prompt: string, projectFolder?: string) {
     const text = prompt.trim();
-    if (!text) throw new Error('Dis à Max ce que tu veux.');
-    if (!this.claude) throw new Error('Claude Code n’est pas installé sur cet ordinateur.');
-    if (this.current?.mission.status === 'working') throw new Error('L’équipe est déjà sur une mission. Attends qu’elle la rende, ou arrête-la.');
+    if (!text) throw new Error('강지영에게 원하는 걸 말해 주세요.');
+    if (!this.claude) throw new Error('이 컴퓨터에 Claude Code가 설치되어 있지 않아요.');
+    if (this.current?.mission.status === 'working') throw new Error('팀이 이미 미션을 진행 중이에요. 끝날 때까지 기다리거나 미션을 멈춰 주세요.');
     if (this.current) this.close();
 
     const now = new Date();
     const title = titleOf(text);
     const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}h${pad(now.getMinutes())}`;
-    let folder = path.join(this.missionsDir, cleanName(`${stamp} · ${title.replace(/…$/, '')}`).slice(0, 90));
-    for (let n = 2; existsSync(folder); n++) folder = path.join(this.missionsDir, cleanName(`${stamp} · ${title.replace(/…$/, '')} ${n}`).slice(0, 90));
-    await mkdir(folder, { recursive: true });
+    const project = projectFolder ? await this.checkProject(projectFolder) : null;
+    let folder = project ?? path.join(this.missionsDir, cleanName(`${stamp} · ${title.replace(/…$/, '')}`).slice(0, 90));
+    if (!project) {
+      for (let n = 2; existsSync(folder); n++) folder = path.join(this.missionsDir, cleanName(`${stamp} · ${title.replace(/…$/, '')} ${n}`).slice(0, 90));
+      await mkdir(folder, { recursive: true });
+    }
 
     const mission: MissionInfo = {
       id: 'm' + Date.now().toString(36), title, prompt: text, folder, createdAt: Date.now(), workMs: 0,
-      status: 'working', stats: emptyStats(), files: [],
+      status: 'working', stats: emptyStats(), files: [], ...(project ? { project: true } : {}),
     };
     this.state.missions.push(mission);
     if (this.state.missions.length > MAX_MISSIONS) this.state.missions.splice(0, this.state.missions.length - MAX_MISSIONS);
@@ -202,13 +205,46 @@ export class Bureau {
     this.say(text);
   }
 
+  /**
+   * Un projet existant où travailler : un vrai dossier, dans ton dossier personnel, mais pas ton dossier personnel lui-même,
+   * ni ses dossiers système, ni le dossier du bureau. Renvoie son chemin réel.
+   */
+  async checkProject(input: string): Promise<string> {
+    const home = os.homedir();
+    const raw = input.trim().replace(/^~(?=$|\/)/, home);
+    if (!raw || !path.isAbsolute(raw)) throw new Error('작업 폴더 경로가 올바르지 않아요.');
+    const real = await realpath(raw).catch(() => null);
+    const st = real ? await stat(real).catch(() => null) : null;
+    if (!real || !st?.isDirectory()) throw new Error('작업 폴더를 찾을 수 없어요. 폴더가 아직 있는지 확인해 주세요.');
+    const realHome = await realpath(home).catch(() => home);
+    const inside = (dir: string) => real === dir || real.startsWith(dir + path.sep);
+    if (!real.startsWith(realHome + path.sep)) throw new Error('작업 폴더는 내 홈 폴더 안에 있어야 해요.');
+    const blocked = ['Library', '.ssh', '.config', '.claude', 'Applications'].map((d) => path.join(realHome, d));
+    const bureauDir = await realpath(this.dir).catch(() => this.dir);
+    if (blocked.some(inside) || inside(bureauDir)) throw new Error('이 폴더에서는 미션을 진행할 수 없어요. 프로젝트 폴더를 골라 주세요.');
+    return real;
+  }
+
+  /** La fenêtre « choisir un dossier » du Mac. null si on annule. */
+  pickFolder(): Promise<string | null> {
+    if (process.platform !== 'darwin') return Promise.reject(new Error('폴더 선택 창은 macOS에서만 열 수 있어요.'));
+    const script = ['activate', 'POSIX path of (choose folder with prompt "강지영 팀이 작업할 프로젝트 폴더를 골라 주세요")'];
+    return new Promise((resolve, reject) => {
+      execFile('osascript', script.flatMap((l) => ['-e', l]), { timeout: 10 * 60_000 }, (err, stdout) => {
+        if (err) return (err as NodeJS.ErrnoException & { code?: number }).code === 1 ? resolve(null) : reject(new Error('폴더 선택 창을 열지 못했어요.'));
+        const picked = stdout.trim().replace(/\/$/, '');
+        this.checkProject(picked).then(resolve, reject);
+      });
+    });
+  }
+
   /** Parler à Max : la mission, puis les retouches. S'il s'était endormi, il reprend sa séance. */
   say(text: string) {
     const cur = this.current;
-    if (!cur) throw new Error('Lance d’abord une mission.');
+    if (!cur) throw new Error('먼저 미션을 시작해 주세요.');
     const clean = text.trim();
     if (!clean) return;
-    if (!this.claude) throw new Error('Claude Code n’est pas installé sur cet ordinateur.');
+    if (!this.claude) throw new Error('이 컴퓨터에 Claude Code가 설치되어 있지 않아요.');
     let l = cur.live;
     if (!l || !l.proc.alive) l = this.spawn(cur);
     if (cur.idleTimer) { clearTimeout(cur.idleTimer); cur.idleTimer = null; }
@@ -225,7 +261,7 @@ export class Bureau {
   }
 
   private spawn(cur: Current, opts: { fresh?: boolean } = {}): Live {
-    if (!this.claude) throw new Error('Claude Code n’est pas installé sur cet ordinateur.');
+    if (!this.claude) throw new Error('이 컴퓨터에 Claude Code가 설치되어 있지 않아요.');
     const s = this.settings;
     const resume = opts.fresh ? undefined : cur.mission.sessionId;
     // le Normalizer renvoie vers la mission courante ; « proc » est connu dès que la ligne suivante a tourné
@@ -240,7 +276,7 @@ export class Bureau {
       {
         bin: this.claude.path, cwd: cur.mission.folder, permissionMode: s.permission === 'ask' ? 'acceptEdits' : 'auto',
         model: s.chefModel || undefined, resume, tools: SESSION_TOOLS, allowedTools: ALWAYS_ALLOWED,
-        agents: agentsJson(s), appendSystemPrompt: chefPrompt(readRules(this.dir)), useApiKey: process.env.BUREAU_USE_API_KEY === '1',
+        agents: agentsJson(s), appendSystemPrompt: chefPrompt(readRules(this.dir), cur.mission.project === true), useApiKey: process.env.BUREAU_USE_API_KEY === '1',
       },
       (m) => {
         if (cur.live?.proc !== proc) return; // un ancien processus qui parle encore
@@ -310,7 +346,7 @@ export class Bureau {
     const failed = !l.stopping && (code !== 0 || signal !== null);
     // La séance à reprendre n'existe plus (Claude Code efface les vieilles séances) : on repart de zéro.
     if (failed && l.resumed && !l.norm.started && l.lastText && this.current === cur) {
-      this.record(cur, { k: 'error', message: 'Je ne retrouve plus notre ancienne conversation : je reprends de zéro, avec ton dernier message.' });
+      this.record(cur, { k: 'error', message: '이전 대화를 찾을 수 없어요: 대표님의 마지막 메시지로 처음부터 다시 시작할게요.' });
       cur.mission.sessionId = undefined;
       const fresh = this.spawn(cur, { fresh: true });
       fresh.lastText = l.lastText;
@@ -319,8 +355,8 @@ export class Bureau {
     }
     if (cur.mission.status === 'working') {
       const message = failed
-        ? (stderr.split('\n').filter(Boolean).slice(-3).join(' ') || (signal ? `Claude Code s’est arrêté (${signal}).` : `Claude Code s’est arrêté (code ${code}).`))
-        : 'Claude Code s’est arrêté.';
+        ? (stderr.split('\n').filter(Boolean).slice(-3).join(' ') || (signal ? `Claude Code가 멈췄어요 (${signal}).` : `Claude Code가 멈췄어요 (코드 ${code}).`))
+        : 'Claude Code가 멈췄어요.';
       if (!cur.stopAsked) this.record(cur, { k: 'error', message });
       // les membres de l'équipe encore présents s'en vont
       for (const id of l.norm.present) this.record(cur, { k: 'leave', who: id, ok: false, tokens: 0, tools: 0, ms: 0 });
@@ -474,10 +510,10 @@ export class Bureau {
   /** Le chemin d'un fichier de la mission (refusé s'il sort du dossier). */
   private inside(missionId: string, file?: string) {
     const m = this.mission(missionId);
-    if (!m) throw new Error('Cette mission n’existe plus.');
+    if (!m) throw new Error('이 미션은 더 이상 없어요.');
     if (!file) return { m, target: m.folder };
     const target = path.resolve(m.folder, file);
-    if (!target.startsWith(m.folder + path.sep) || !existsSync(target)) throw new Error('Ce fichier n’est pas dans le dossier de la mission.');
+    if (!target.startsWith(m.folder + path.sep) || !existsSync(target)) throw new Error('이 파일은 미션 폴더 안에 없어요.');
     return { m, target };
   }
 
@@ -500,9 +536,9 @@ export class Bureau {
   async readText(missionId: string, file: string, version?: string) {
     let { target } = this.inside(missionId, file);
     if (version) {
-      if (!/^\d+__[\w-]*(\.[\w-]+)?$/.test(version)) throw new Error('Version inconnue.');
+      if (!/^\d+__[\w-]*(\.[\w-]+)?$/.test(version)) throw new Error('알 수 없는 버전이에요.');
       target = path.join(this.verDir, missionId, versionDirName(file), version);
-      if (!existsSync(target)) throw new Error('Cette version n’existe plus.');
+      if (!existsSync(target)) throw new Error('이 버전은 더 이상 없어요.');
     }
     const st = await stat(target);
     const max = 400_000;
@@ -513,14 +549,14 @@ export class Bureau {
   /** L'enregistrement d'une mission, pour la rejouer (pratique pour filmer sans relancer l'équipe). */
   async replay(missionId: string): Promise<{ mission: MissionInfo; log: Logged[] }> {
     const m = this.mission(missionId);
-    if (!m) throw new Error('Cette mission n’existe plus.');
+    if (!m) throw new Error('이 미션은 더 이상 없어요.');
     const raw = await readFile(path.join(this.recDir, `${m.id}.jsonl`), 'utf8').catch(() => '');
     const log: Logged[] = [];
     for (const line of raw.split('\n')) {
       if (!line.trim()) continue;
       try { log.push(JSON.parse(line) as Logged); } catch { /* ligne coupée */ }
     }
-    if (!log.length) throw new Error('Cette mission n’a pas été enregistrée.');
+    if (!log.length) throw new Error('이 미션은 기록되지 않았어요.');
     return { mission: m, log };
   }
 
@@ -534,7 +570,7 @@ export class Bureau {
         await writeFile(tmp, JSON.stringify(this.state));
         await rename(tmp, this.stateFile);
       } catch (e) {
-        console.error('  ⚠  Sauvegarde du bureau impossible :', e instanceof Error ? e.message : e);
+        console.error('  ⚠  사무실 상태를 저장할 수 없어요:', e instanceof Error ? e.message : e);
       }
     }, 1000);
   }

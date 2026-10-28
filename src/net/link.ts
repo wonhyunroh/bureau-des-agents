@@ -12,7 +12,7 @@ let build = '';
 
 export function sendToBridge(m: ClientMsg) {
   if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify(m));
-  else useOffice.getState().toast('error', 'Le bureau n’est pas relié à Claude Code : lance « npm start » dans le dossier du bureau.');
+  else useOffice.getState().toast('error', '사무실이 Claude Code에 연결되지 않았어요. 사무실 폴더에서 「npm start」를 실행해 주세요.');
 }
 
 export function connect() {
@@ -110,7 +110,7 @@ async function startDemo() {
     const data = (await res.json()) as { mission: MissionInfo; log: Logged[] };
     useOffice.setState({
       connection: 'demo',
-      send: () => useOffice.getState().toast('info', 'C’est une démo : installe le Bureau des agents pour lancer ta propre équipe.'),
+      send: () => useOffice.getState().toast('info', '데모예요. 에이전트 사무실을 설치하면 나만의 팀을 움직일 수 있어요.'),
     });
     playReplay(data.mission, data.log, 1, { loop: true });
   } catch { /* pas de démo disponible */ }

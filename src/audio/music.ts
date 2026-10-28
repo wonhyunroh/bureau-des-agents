@@ -6,12 +6,12 @@ import { useOffice } from '../state/store.ts';
 export interface Track { id: string; title: string; mood: string; by: string; file: string }
 
 export const TRACKS: Track[] = [
-  { id: 'coucher-de-soleil', title: 'Coucher de soleil', mood: 'House progressive mélodique', by: 'ElevenLabs', file: '/music/coucher-de-soleil.mp3' },
-  { id: 'nuit-au-bureau', title: 'Nuit au bureau', mood: 'Techno mélodique', by: 'ElevenLabs', file: '/music/nuit-au-bureau.mp3' },
-  { id: 'afterwork', title: 'Afterwork', mood: 'House progressive solaire', by: 'ElevenLabs', file: '/music/afterwork.mp3' },
-  { id: 'golden-hour', title: 'Golden hour', mood: 'House progressive', by: 'Lyria', file: '/music/golden-hour.mp3' },
-  { id: 'minuit-pile', title: 'Minuit pile', mood: 'Techno mélodique', by: 'Lyria', file: '/music/minuit-pile.mp3' },
-  { id: 'vendredi-18h', title: 'Vendredi 18 h', mood: 'House solaire', by: 'Lyria', file: '/music/vendredi-18h.mp3' },
+  { id: 'coucher-de-soleil', title: '해 질 녘', mood: '멜로딕 프로그레시브 하우스', by: 'ElevenLabs', file: '/music/coucher-de-soleil.mp3' },
+  { id: 'nuit-au-bureau', title: '사무실의 밤', mood: '멜로딕 테크노', by: 'ElevenLabs', file: '/music/nuit-au-bureau.mp3' },
+  { id: 'afterwork', title: '퇴근 후', mood: '햇살 가득 프로그레시브 하우스', by: 'ElevenLabs', file: '/music/afterwork.mp3' },
+  { id: 'golden-hour', title: '골든 아워', mood: '프로그레시브 하우스', by: 'Lyria', file: '/music/golden-hour.mp3' },
+  { id: 'minuit-pile', title: '자정 정각', mood: '멜로딕 테크노', by: 'Lyria', file: '/music/minuit-pile.mp3' },
+  { id: 'vendredi-18h', title: '금요일 오후 6시', mood: '햇살 가득 하우스', by: 'Lyria', file: '/music/vendredi-18h.mp3' },
 ];
 
 class Jukebox {

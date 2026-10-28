@@ -23,6 +23,8 @@ export interface MissionInfo {
   prompt: string;
   /** le dossier de la mission, sur ton ordinateur */
   folder: string;
+  /** vrai si la mission travaille dans un projet existant (choisi par toi), pas dans un dossier neuf */
+  project?: boolean;
   createdAt: number;
   endedAt?: number;
   /** temps de travail cumulé (toutes les reprises comprises) */
@@ -98,7 +100,9 @@ export interface Quota { fiveHour: number; resetsAt: number | null }
 
 // ── Navigateur → serveur ──
 export type ClientMsg =
-  | { t: 'start'; prompt: string }
+  | { t: 'start'; prompt: string; folder?: string }
+  /** ouvre la fenêtre « choisir un dossier » du Mac */
+  | { t: 'pick_folder' }
   | { t: 'say'; text: string }
   | { t: 'stop' }
   | { t: 'answer'; requestId: string; allow: boolean }
@@ -124,4 +128,5 @@ export type ServerMsg =
   | { t: 'team_history'; entries: TeamEntry[] }
   | { t: 'quota'; quota: Quota }
   | { t: 'settings'; settings: Settings }
-  | { t: 'toast'; kind: 'info' | 'error'; text: string };
+  | { t: 'toast'; kind: 'info' | 'error'; text: string }
+  | { t: 'picked_folder'; folder: string | null };

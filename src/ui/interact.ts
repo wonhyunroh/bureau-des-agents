@@ -9,9 +9,9 @@ import { savePref, useOffice, type Tod } from '../state/store.ts';
 const TOD_NEXT: Record<Tod, Tod> = { auto: 'day', day: 'evening', evening: 'night', night: 'auto' };
 
 const QUOTES = [
-  'Objectif du trimestre : zéro tâche répétitive.',
-  'Règle n°1 du bureau : on délègue tout ce qui se délègue.',
-  'Ici, personne ne compte ses heures. Personne n’en a besoin.',
+  '이번 분기 목표: 반복 업무 제로.',
+  '사무실 규칙 1조: 맡길 수 있는 건 전부 맡긴다.',
+  '여기선 아무도 근무 시간을 세지 않아요. 그럴 필요가 없거든요.',
 ];
 
 let jukeClicks: number[] = [];

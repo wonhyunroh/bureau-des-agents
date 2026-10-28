@@ -33,7 +33,7 @@ const CSP = [
 const TYPES: Record<string, string> = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
-  '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ico': 'image/x-icon', '.mp3': 'audio/mpeg',
+  '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.ico': 'image/x-icon', '.mp3': 'audio/mpeg', '.m4a': 'audio/mp4',
   '.gif': 'image/gif', '.mp4': 'video/mp4', '.webm': 'video/webm', '.txt': 'text/plain; charset=utf-8', '.md': 'text/plain; charset=utf-8',
   '.csv': 'text/plain; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.htm': 'text/html; charset=utf-8', '.ttf': 'font/ttf', '.otf': 'font/otf',
 };
@@ -59,7 +59,7 @@ await bureau.init();
 const server = http.createServer(async (req, res) => {
   const url0 = new URL(req.url ?? '/', 'http://x');
   if (url0.pathname.startsWith('/apercu/')) { await preview(url0, res); return; }
-  if (DEV) { res.writeHead(404).end(`Mode développement : le bureau est sur http://localhost:${DEV_PORT}`); return; }
+  if (DEV) { res.writeHead(404).end(`개발 모드: 사무실은 http://localhost:${DEV_PORT} 에 있어요`); return; }
   try {
     const url = url0;
     let file = path.normalize(path.join(DIST, decodeURIComponent(url.pathname)));
@@ -69,14 +69,15 @@ const server = http.createServer(async (req, res) => {
     const ext = path.extname(file);
     res.writeHead(200, {
       'Content-Type': TYPES[ext] ?? 'application/octet-stream',
-      'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=3600',
+      // la voix se remplace sans changer de nom : toujours redemander au serveur
+      'Cache-Control': ext === '.html' || url.pathname.startsWith('/voice/') ? 'no-cache' : 'public, max-age=3600',
       'X-Content-Type-Options': 'nosniff',
       // aucun script venu d'ailleurs : même un lien piégé dans un rapport ne peut rien exécuter
       ...(ext === '.html' ? { 'Content-Security-Policy': CSP } : {}),
     });
     res.end(body);
   } catch {
-    res.writeHead(500).end('Le bureau n’est pas compilé : lance « npm start ».');
+    res.writeHead(500).end('사무실이 아직 빌드되지 않았어요: 「npm start」를 실행해 주세요.');
   }
 });
 
@@ -88,7 +89,7 @@ async function preview(url: URL, res: http.ServerResponse) {
     let rel = parts.join('/');
     if (!rel || rel.endsWith('/')) rel += 'index.html';
     const file = bureau.previewPath(missionId, rel);
-    if (!file) { res.writeHead(404, { 'Content-Security-Policy': PREVIEW_CSP }).end('Introuvable dans le dossier de la mission.'); return; }
+    if (!file) { res.writeHead(404, { 'Content-Security-Policy': PREVIEW_CSP }).end('미션 폴더에서 찾을 수 없어요.'); return; }
     const body = await readFile(file);
     res.writeHead(200, {
       'Content-Type': TYPES[path.extname(file).toLowerCase()] ?? 'application/octet-stream',
@@ -138,7 +139,7 @@ const str = (v: unknown, max = 20000) => (typeof v === 'string' ? v.slice(0, max
 async function handle(m: ClientMsg, send: (m: ServerMsg) => void) {
   switch (m.t) {
     case 'start':
-      await bureau.start(str(m.prompt));
+      await bureau.start(str(m.prompt), m.folder ? str(m.folder, 2000) : undefined);
       break;
     case 'say':
       bureau.say(str(m.text));
@@ -178,6 +179,9 @@ async function handle(m: ClientMsg, send: (m: ServerMsg) => void) {
       send({ t: 'replay', mission, log });
       break;
     }
+    case 'pick_folder':
+      send({ t: 'picked_folder', folder: await bureau.pickFolder() });
+      break;
     case 'settings':
       bureau.setSettings(m.settings ?? {});
       break;
@@ -187,7 +191,7 @@ async function handle(m: ClientMsg, send: (m: ServerMsg) => void) {
 function listen(port: number) {
   server.once('error', (e: NodeJS.ErrnoException) => {
     if (e.code === 'EADDRINUSE') {
-      console.error(`  Le port ${port} est déjà pris : le bureau tourne peut-être déjà (http://localhost:${port}).`);
+      console.error(`  ${port}번 포트가 이미 사용 중이에요: 사무실이 이미 실행 중일 수도 있어요 (http://localhost:${port}).`);
       process.exit(1);
     }
     throw e;
@@ -195,11 +199,11 @@ function listen(port: number) {
   server.listen(port, HOST, () => {
     const url = `http://localhost:${port}`;
     console.log('');
-    console.log('  🏢  Le Bureau des agents');
-    console.log(`  ➜  ${DEV ? `Pont prêt (le bureau : http://localhost:${DEV_PORT})` : url}`);
-    console.log(`  📁  Les missions : ${bureau.missionsDir}`);
-    console.log(claude ? `  ✓  Claude Code ${claude.version} (${claude.path})` : '  ✗  Claude Code introuvable : le bureau tournera en démo.');
-    console.log('  ⏹  Pour arrêter : Ctrl + C');
+    console.log('  🏢  에이전트 사무실');
+    console.log(`  ➜  ${DEV ? `서버 준비 완료 (사무실: http://localhost:${DEV_PORT})` : url}`);
+    console.log(`  📁  미션 폴더: ${bureau.missionsDir}`);
+    console.log(claude ? `  ✓  Claude Code ${claude.version} (${claude.path})` : '  ✗  Claude Code를 찾을 수 없어요: 사무실이 데모 모드로 실행돼요.');
+    console.log('  ⏹  종료하려면: Ctrl + C');
     console.log('');
     if (args.has('--open') && !DEV) {
       const opener = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'explorer' : 'xdg-open';

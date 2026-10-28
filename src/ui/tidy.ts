@@ -7,7 +7,7 @@ export function tidy(text: string): string {
   const s = useOffice.getState();
   let t = text;
   const folder = s.mission?.folder;
-  if (folder) t = t.split(folder + '/').join('').split(folder).join('le dossier de la mission');
+  if (folder) t = t.split(folder + '/').join('').split(folder).join('미션 폴더');
   if (s.dir) t = t.split(s.dir).join('Bureau des agents');
-  return t.replace(/(?:\/private)?\/(?:Users|home|tmp|var)\/[^\s"'`)»]*\/([^/\s"'`)»]+)/g, '…/$1');
+  return t.replace(/(?:\/private)?\/(?:Users|home|tmp|var)\/[^\s"'`)»」]*\/([^/\s"'`)»」]+)/g, '…/$1');
 }

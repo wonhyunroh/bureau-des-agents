@@ -5,14 +5,14 @@ import { camera, world } from '../engine/instance.ts';
 import { useOffice } from '../state/store.ts';
 
 const STEPS: { line: Line; text: string; shot: [number, number, number] }[] = [
-  { line: 'visite-1', text: 'Bienvenue dans mon bureau ! Moi, c’est Max, le chef. Ici, une équipe d’agents IA bosse pour toi, jour et nuit.', shot: [176, 186, 1.9] },
-  { line: 'visite-2', text: 'Là, c’est la recherche. Mes chercheurs fouillent internet pour toi. Les prix, tes concurrents, les avis clients.', shot: [64, 104, 1.7] },
-  { line: 'visite-3', text: 'Ici, l’atelier code. Ils construisent tes sites, tes outils, tes automatisations.', shot: [288, 76, 1.95] },
-  { line: 'visite-4', text: 'Le studio design. Tout ce qui doit être beau passe par ici.', shot: [276, 124, 1.95] },
-  { line: 'visite-5', text: 'La rédaction. Tes posts, tes mails, tes scripts vidéo.', shot: [64, 188, 1.95] },
-  { line: 'visite-6', text: 'Et l’analyse. Les chiffres, les tableaux, et les conclusions qui comptent.', shot: [258, 188, 1.95] },
-  { line: 'visite-7', text: 'Sur ce tableau, j’écris le plan de chaque mission. Et chaque rapport finit sur mon bureau.', shot: [176, 46, 2.05] },
-  { line: 'visite-8', text: 'Toi, tu me dis ce que tu veux. Je monte l’équipe. Et tu regardes.', shot: [176, 128, 1] },
+  { line: 'visite-1', text: '제 사무실에 오신 걸 환영해요! 저는 팀장 강지영이에요. 여기서는 AI 에이전트 팀이 밤낮없이 대표님을 위해 일해요.', shot: [176, 186, 1.9] },
+  { line: 'visite-2', text: '저기는 리서치 팀이에요. 리서처들이 인터넷을 샅샅이 뒤져요. 가격, 경쟁사, 고객 후기까지요.', shot: [64, 104, 1.7] },
+  { line: 'visite-3', text: '여기는 코드 작업실이에요. 웹사이트, 도구, 자동화를 만들어요.', shot: [288, 76, 1.95] },
+  { line: 'visite-4', text: '디자인 스튜디오예요. 예뻐야 하는 건 전부 여기를 거쳐요.', shot: [276, 124, 1.95] },
+  { line: 'visite-5', text: '글쓰기 팀이에요. 게시물, 메일, 영상 대본을 써요.', shot: [64, 188, 1.95] },
+  { line: 'visite-6', text: '그리고 분석 팀이에요. 숫자, 표, 그리고 중요한 결론을 맡아요.', shot: [258, 188, 1.95] },
+  { line: 'visite-7', text: '이 보드에 미션마다 계획을 적어요. 그리고 모든 보고서는 제 책상으로 와요.', shot: [176, 46, 2.05] },
+  { line: 'visite-8', text: '대표님은 원하는 걸 말씀만 하세요. 제가 팀을 꾸릴게요. 그냥 지켜보시면 돼요.', shot: [176, 128, 1] },
 ];
 
 let run = 0;

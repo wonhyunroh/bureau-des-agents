@@ -13,13 +13,13 @@ export interface RoleInfo {
 }
 
 export const ROLES: Record<Role, RoleInfo> = {
-  chef: { label: 'Chef de projet', icon: '⭐', color: '#FF8A3D', type: '', what: 'Il reçoit ta demande, fait le plan, répartit le travail et assemble le rendu.' },
-  recherche: { label: 'Recherche', icon: '🔎', color: '#4FB3FF', type: 'chercheur', what: 'Cherche sur internet : concurrents, prix, avis, actualités, sources.' },
-  code: { label: 'Code', icon: '💻', color: '#3DDC97', type: 'developpeur', what: 'Code, sites, scripts, automatisations : ce qui se lance et se teste.' },
-  design: { label: 'Design', icon: '🎨', color: '#FF6FA8', type: 'designer', what: 'Pages web soignées, maquettes, visuels, mise en forme.' },
-  redaction: { label: 'Rédaction', icon: '✍️', color: '#A98BFF', type: 'redacteur', what: 'Posts, e-mails, articles, scripts vidéo, rapports.' },
-  analyse: { label: 'Analyse', icon: '📊', color: '#FFC93D', type: 'analyste', what: 'Chiffres, tableaux, fichiers, comparatifs, calculs.' },
-  renfort: { label: 'Renfort', icon: '🤖', color: '#9AA3B5', type: '', what: 'Un coup de main sur une tâche à part.' },
+  chef: { label: '팀장', icon: '⭐', color: '#FF8A3D', type: '', what: '요청을 받아 계획을 세우고, 일을 나누고, 결과물을 합쳐요.' },
+  recherche: { label: '리서치', icon: '🔎', color: '#4FB3FF', type: 'chercheur', what: '인터넷에서 조사해요: 경쟁사, 가격, 리뷰, 뉴스, 출처.' },
+  code: { label: '코드', icon: '💻', color: '#3DDC97', type: 'developpeur', what: '코드, 웹사이트, 스크립트, 자동화: 실행하고 테스트하는 모든 것.' },
+  design: { label: '디자인', icon: '🎨', color: '#FF6FA8', type: 'designer', what: '완성도 높은 웹 페이지, 시안, 비주얼, 꾸미기.' },
+  redaction: { label: '글쓰기', icon: '✍️', color: '#A98BFF', type: 'redacteur', what: 'SNS 게시물, 이메일, 기사, 영상 대본, 보고서.' },
+  analyse: { label: '분석', icon: '📊', color: '#FFC93D', type: 'analyste', what: '숫자, 표, 파일, 비교, 계산.' },
+  renfort: { label: '지원', icon: '🤖', color: '#9AA3B5', type: '', what: '따로 떨어진 작업을 도와줘요.' },
 };
 
 /** Les outils Claude Code de chaque métier (le chef a tous ceux de la séance). */
@@ -35,9 +35,9 @@ export const ROLE_TOOLS: Record<Role, string[]> = {
 
 /** Ce que veut dire chaque outil, en français (pour la fiche des métiers). */
 export const TOOL_INFO: Record<string, string> = {
-  Agent: 'appelle un membre de l’équipe', TodoWrite: 'écrit et coche le plan', Read: 'lit un fichier', Write: 'crée un fichier',
-  Edit: 'retouche un fichier', Glob: 'cherche des fichiers', Grep: 'cherche dans les fichiers', WebSearch: 'cherche sur internet',
-  WebFetch: 'lit une page web', Bash: 'lance une commande',
+  Agent: '팀원을 불러요', TodoWrite: '계획을 쓰고 체크해요', Read: '파일을 읽어요', Write: '파일을 만들어요',
+  Edit: '파일을 고쳐요', Glob: '파일을 찾아요', Grep: '파일 안에서 찾아요', WebSearch: '인터넷에서 검색해요',
+  WebFetch: '웹 페이지를 읽어요', Bash: '명령어를 실행해요',
 };
 
 /** Le métier d'un agent, d'après le type d'agent que le chef a appelé. */
@@ -48,7 +48,7 @@ export function roleOfType(type: string): Role {
 
 /** Les prénoms des robots, par métier (jamais deux fois le même dans une mission). */
 export const NAMES: Record<Role, string[]> = {
-  chef: ['Max'],
+  chef: ['강지영'],
   recherche: ['Iris', 'Hugo', 'Léa', 'Malo', 'Zoé', 'Noé', 'Inès', 'Tom', 'Jade', 'Sacha', 'Lou', 'Nils'],
   code: ['Ada', 'Linus', 'Grace', 'Alan', 'Margaret', 'Dennis'],
   design: ['Frida', 'Coco', 'Henri', 'Sonia', 'Saul'],
@@ -67,7 +67,7 @@ export const host = (u: unknown) => {
 };
 
 const MCP_NAMES: Record<string, string> = {
-  gmail: 'Gmail', google_drive: 'Google Drive', notion: 'Notion', google_calendar: 'Google Agenda', calendar: 'Google Agenda',
+  gmail: 'Gmail', google_drive: 'Google Drive', notion: 'Notion', google_calendar: 'Google 캘린더', calendar: 'Google 캘린더',
   slack: 'Slack', github: 'GitHub', stripe: 'Stripe', hubspot: 'HubSpot', airtable: 'Airtable',
 };
 
@@ -83,29 +83,29 @@ export function mcpName(tool: string): { server: string; action: string } {
 export function describeAct(tool: string, input: Record<string, unknown> | undefined): { kind: ActKind; label: string; detail: string } {
   const i = input ?? {};
   switch (tool) {
-    case 'WebSearch': return { kind: 'search', label: `Je cherche « ${cut(i.query, 44)} »`, detail: String(i.query ?? '') };
-    case 'WebFetch': return { kind: 'web', label: `Je lis ${host(i.url)}`, detail: String(i.url ?? '') };
-    case 'Read': return { kind: 'read', label: `Je lis ${cut(base(i.file_path), 36)}`, detail: String(i.file_path ?? '') };
-    case 'Glob': return { kind: 'read', label: 'Je fouille le dossier', detail: String(i.pattern ?? '') };
-    case 'Grep': return { kind: 'read', label: `Je cherche « ${cut(i.pattern, 30)} »`, detail: `${i.pattern ?? ''}${i.path ? ' dans ' + i.path : ''}` };
-    case 'LS': return { kind: 'read', label: 'Je regarde le dossier', detail: String(i.path ?? '') };
-    case 'Write': return { kind: 'write', label: `J’écris ${cut(base(i.file_path), 36)}`, detail: String(i.file_path ?? '') };
+    case 'WebSearch': return { kind: 'search', label: `「${cut(i.query, 44)}」 검색 중`, detail: String(i.query ?? '') };
+    case 'WebFetch': return { kind: 'web', label: `${host(i.url)} 읽는 중`, detail: String(i.url ?? '') };
+    case 'Read': return { kind: 'read', label: `${cut(base(i.file_path), 36)} 읽는 중`, detail: String(i.file_path ?? '') };
+    case 'Glob': return { kind: 'read', label: '폴더 살펴보는 중', detail: String(i.pattern ?? '') };
+    case 'Grep': return { kind: 'read', label: `「${cut(i.pattern, 30)}」 찾는 중`, detail: `${i.pattern ?? ''}${i.path ? ' (' + i.path + ')' : ''}` };
+    case 'LS': return { kind: 'read', label: '폴더 보는 중', detail: String(i.path ?? '') };
+    case 'Write': return { kind: 'write', label: `${cut(base(i.file_path), 36)} 작성 중`, detail: String(i.file_path ?? '') };
     case 'Edit':
-    case 'MultiEdit': return { kind: 'edit', label: `Je retouche ${cut(base(i.file_path), 34)}`, detail: String(i.file_path ?? '') };
-    case 'NotebookEdit': return { kind: 'edit', label: `Je retouche ${cut(base(i.notebook_path), 34)}`, detail: String(i.notebook_path ?? '') };
+    case 'MultiEdit': return { kind: 'edit', label: `${cut(base(i.file_path), 34)} 수정 중`, detail: String(i.file_path ?? '') };
+    case 'NotebookEdit': return { kind: 'edit', label: `${cut(base(i.notebook_path), 34)} 수정 중`, detail: String(i.notebook_path ?? '') };
     case 'Bash': {
       const c = String(i.command ?? '').replace(/\s+/g, ' ').trim();
-      return { kind: 'bash', label: `Je lance ${c.length <= 34 ? `« ${c} »` : cut(i.description || c, 40)}`, detail: String(i.command ?? '') };
+      return { kind: 'bash', label: `${c.length <= 34 ? `「${c}」` : cut(i.description || c, 40)} 실행 중`, detail: String(i.command ?? '') };
     }
-    case 'TodoWrite': return { kind: 'plan', label: 'Je mets le plan à jour', detail: '' };
-    case 'Skill': return { kind: 'skill', label: `J’applique la méthode ${cut(i.skill ?? i.name, 24)}`, detail: String(i.args ?? '') };
-    case 'ToolSearch': return { kind: 'other', label: 'Je cherche le bon outil', detail: String(i.query ?? '') };
+    case 'TodoWrite': return { kind: 'plan', label: '계획 업데이트 중', detail: '' };
+    case 'Skill': return { kind: 'skill', label: `${cut(i.skill ?? i.name, 24)} 스킬 사용 중`, detail: String(i.args ?? '') };
+    case 'ToolSearch': return { kind: 'other', label: '알맞은 도구 찾는 중', detail: String(i.query ?? '') };
   }
   if (tool.startsWith('mcp__')) {
     const { server, action } = mcpName(tool);
-    return { kind: 'mcp', label: `Je passe par ${server}`, detail: action };
+    return { kind: 'mcp', label: `${server} 사용 중`, detail: action };
   }
-  return { kind: 'other', label: `J’utilise ${tool}`, detail: '' };
+  return { kind: 'other', label: `${tool} 사용 중`, detail: '' };
 }
 
 export const emptyStats = (): MissionStats => ({ agents: 0, searches: 0, pages: 0, reads: 0, writes: 0, commands: 0 });
@@ -144,20 +144,20 @@ export function permissionText(tool: string, input: Record<string, unknown> | un
   if (tool === 'Bash') {
     const c = readableCommand(i.command, folder);
     const full = c.length > 0 && c.length <= FULL_MAX && !c.includes('\n');
-    return { label: `Je peux lancer « ${full ? c : cut(c, 48)} » ?`, detail: c, full };
+    return { label: `「${full ? c : cut(c, 48)}」 실행해도 될까요?`, detail: c, full };
   }
   if (tool === 'Write' || tool === 'Edit' || tool === 'MultiEdit' || tool === 'NotebookEdit') {
     const raw = String(i.file_path ?? i.notebook_path ?? '');
     const rel = relToFolder(raw, folder);
     const inside = !!folder && raw.startsWith(folder + '/') && !rel.includes('..');
-    return { label: `Je peux ${tool === 'Write' ? 'écrire' : 'modifier'} ${inside ? rel : raw} ?`, detail: raw, full: inside && rel.length <= FULL_MAX };
+    return { label: `${inside ? rel : raw} ${tool === 'Write' ? '작성해도' : '수정해도'} 될까요?`, detail: raw, full: inside && rel.length <= FULL_MAX };
   }
-  if (tool === 'WebFetch') return { label: `Je peux lire ${host(i.url)} ?`, detail: String(i.url ?? ''), full: false };
+  if (tool === 'WebFetch') return { label: `${host(i.url)} 읽어도 될까요?`, detail: String(i.url ?? ''), full: false };
   const detail = relToFolder(JSON.stringify(i, null, 2), folder);
   const clipped = detail.length > 1500 ? detail.slice(0, 1499) + '…' : detail;
   if (tool.startsWith('mcp__')) {
     const { server, action } = mcpName(tool);
-    return { label: `Je peux passer par ${server} (${action}) ?`, detail: clipped, full: false };
+    return { label: `${server} 사용해도 될까요? (${action})`, detail: clipped, full: false };
   }
-  return { label: `Je peux utiliser ${tool} ?`, detail: clipped, full: false };
+  return { label: `${tool} 사용해도 될까요?`, detail: clipped, full: false };
 }
