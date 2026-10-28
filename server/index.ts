@@ -56,7 +56,11 @@ const bureau = new Bureau(claude, broadcast, process.env.BUREAU_DIR);
 await bureau.init();
 
 // ── Le serveur web (le bureau compilé) ──
+// seuls les noms locaux sont acceptés : un site piégé qui se ferait passer pour 127.0.0.1 (DNS rebinding) n'obtient rien
+const allowedHosts = new Set([PORT, ...(DEV ? [DEV_PORT] : [])].flatMap((p) => [`localhost:${p}`, `127.0.0.1:${p}`, `[::1]:${p}`]));
+
 const server = http.createServer(async (req, res) => {
+  if (!allowedHosts.has(String(req.headers.host ?? '').toLowerCase())) { res.writeHead(421).end(); return; }
   const url0 = new URL(req.url ?? '/', 'http://x');
   if (url0.pathname.startsWith('/apercu/')) { await preview(url0, res); return; }
   if (DEV) { res.writeHead(404).end(`개발 모드: 사무실은 http://localhost:${DEV_PORT} 에 있어요`); return; }
@@ -88,7 +92,7 @@ async function preview(url: URL, res: http.ServerResponse) {
     const missionId = parts.shift() ?? '';
     let rel = parts.join('/');
     if (!rel || rel.endsWith('/')) rel += 'index.html';
-    const file = bureau.previewPath(missionId, rel);
+    const file = await bureau.previewPath(missionId, rel);
     if (!file) { res.writeHead(404, { 'Content-Security-Policy': PREVIEW_CSP }).end('미션 폴더에서 찾을 수 없어요.'); return; }
     const body = await readFile(file);
     res.writeHead(200, {
@@ -154,7 +158,7 @@ async function handle(m: ClientMsg, send: (m: ServerMsg) => void) {
       bureau.close();
       break;
     case 'open':
-      bureau.open(str(m.missionId, 40), m.file ? str(m.file, 1000) : undefined);
+      await bureau.open(str(m.missionId, 40), m.file ? str(m.file, 1000) : undefined);
       break;
     case 'open_root':
       bureau.openRoot(m.rules === true);

@@ -6,13 +6,13 @@
 // une fois finie (retouches) : la même séance reprend.
 import { execFile } from 'node:child_process';
 import { existsSync, readFileSync, renameSync, watch, writeFileSync, type FSWatcher } from 'node:fs';
-import { appendFile, copyFile, mkdir, readdir, readFile, realpath, rename, stat, unlink, writeFile } from 'node:fs/promises';
+import { appendFile, copyFile, lstat, mkdir, readdir, readFile, realpath, rename, stat, unlink, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { countStats, emptyStats } from '../shared/activity.ts';
 import type { ClaudeInfo, FileInfo, Logged, MissionInfo, OfficeEvent, Quota, Role, ServerMsg, Settings, TeamEntry, VersionInfo } from '../shared/protocol.ts';
 import { ClaudeProcess, Normalizer, type ClaudeBinary, type TurnResult } from './claude.ts';
-import { agentsJson, ALWAYS_ALLOWED, chefPrompt, SESSION_TOOLS } from './team.ts';
+import { agentsJson, ALWAYS_ALLOWED, chefPrompt, PROJECT_ALLOWED, SESSION_TOOLS } from './team.ts';
 
 const RULES_FILE = 'Règlement du bureau.md';
 
@@ -97,6 +97,19 @@ function readRules(dir: string) {
   try {
     return readFileSync(path.join(dir, RULES_FILE), 'utf8').replace(/<!--[\s\S]*?-->/g, '').slice(0, 20000);
   } catch { return ''; }
+}
+
+/**
+ * Un fichier de la mission, par son chemin réel : un lien symbolique ne fait pas sortir du dossier.
+ * Dans un projet existant, rien de caché (.env, .git, .ssh…) n'est lu, ouvert ni montré. null si refusé.
+ */
+async function safeTarget(m: MissionInfo, rel: string): Promise<string | null> {
+  const lexical = path.resolve(m.folder, rel);
+  if (!lexical.startsWith(m.folder + path.sep)) return null;
+  if (m.project && path.relative(m.folder, lexical).split(path.sep).some((p) => p.startsWith('.'))) return null;
+  const [root, real] = await Promise.all([realpath(m.folder).catch(() => null), realpath(lexical).catch(() => null)]);
+  if (!root || !real || !real.startsWith(root + path.sep)) return null;
+  return real;
 }
 
 export class Bureau {
@@ -275,7 +288,7 @@ export class Bureau {
     const proc: ClaudeProcess = new ClaudeProcess(
       {
         bin: this.claude.path, cwd: cur.mission.folder, permissionMode: s.permission === 'ask' ? 'acceptEdits' : 'auto',
-        model: s.chefModel || undefined, resume, tools: SESSION_TOOLS, allowedTools: ALWAYS_ALLOWED,
+        model: s.chefModel || undefined, resume, tools: SESSION_TOOLS, allowedTools: cur.mission.project ? PROJECT_ALLOWED : ALWAYS_ALLOWED,
         agents: agentsJson(s), appendSystemPrompt: chefPrompt(readRules(this.dir), cur.mission.project === true), useApiKey: process.env.BUREAU_USE_API_KEY === '1',
       },
       (m) => {
@@ -395,7 +408,8 @@ export class Bureau {
   private async fileChanged(cur: Current, rel: string) {
     if (this.current !== cur) return;
     const abs = path.join(cur.mission.folder, rel);
-    const st = await stat(abs).catch(() => null);
+    // un lien symbolique n'est pas un rendu : on ne le suit pas (il pourrait pointer hors du dossier)
+    const st = await lstat(abs).catch(() => null);
     if (!st || !st.isFile()) return;
     const files = cur.mission.files;
     const i = files.findIndex((f) => f.path === rel);
@@ -424,7 +438,7 @@ export class Bureau {
 
   /** Les versions d'un rendu, de la plus récente à la plus ancienne. */
   async versions(missionId: string, file: string): Promise<VersionInfo[]> {
-    this.inside(missionId, file);
+    await this.inside(missionId, file);
     const dir = path.join(this.verDir, missionId, versionDirName(file));
     const names = await readdir(dir).catch(() => [] as string[]);
     const out: VersionInfo[] = [];
@@ -438,12 +452,9 @@ export class Bureau {
   }
 
   /** Le chemin d'un fichier de la mission pour l'aperçu des sites (null s'il sort du dossier). */
-  previewPath(missionId: string, rel: string): string | null {
+  async previewPath(missionId: string, rel: string): Promise<string | null> {
     const m = this.mission(missionId);
-    if (!m) return null;
-    const target = path.resolve(m.folder, rel);
-    if (!target.startsWith(m.folder + path.sep) || !existsSync(target)) return null;
-    return target;
+    return m ? safeTarget(m, rel) : null;
   }
 
   /** Tous les agents passés au bureau, mission par mission (les plus récentes d'abord). */
@@ -508,18 +519,18 @@ export class Bureau {
   }
 
   /** Le chemin d'un fichier de la mission (refusé s'il sort du dossier). */
-  private inside(missionId: string, file?: string) {
+  private async inside(missionId: string, file?: string) {
     const m = this.mission(missionId);
     if (!m) throw new Error('이 미션은 더 이상 없어요.');
     if (!file) return { m, target: m.folder };
-    const target = path.resolve(m.folder, file);
-    if (!target.startsWith(m.folder + path.sep) || !existsSync(target)) throw new Error('이 파일은 미션 폴더 안에 없어요.');
+    const target = await safeTarget(m, file);
+    if (!target) throw new Error('이 파일은 미션 폴더 안에 없어요.');
     return { m, target };
   }
 
   /** Ouvre le dossier de la mission (ou un de ses fichiers) avec l'appli par défaut. */
-  open(missionId: string, file?: string) {
-    const { target } = this.inside(missionId, file);
+  async open(missionId: string, file?: string) {
+    const { target } = await this.inside(missionId, file);
     const opener = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'explorer' : 'xdg-open';
     execFile(opener, [target], () => {});
   }
@@ -534,7 +545,7 @@ export class Bureau {
 
   /** Le texte d'un rendu (rapport, CSV…), pour le lire dans le bureau. */
   async readText(missionId: string, file: string, version?: string) {
-    let { target } = this.inside(missionId, file);
+    let { target } = await this.inside(missionId, file);
     if (version) {
       if (!/^\d+__[\w-]*(\.[\w-]+)?$/.test(version)) throw new Error('알 수 없는 버전이에요.');
       target = path.join(this.verDir, missionId, versionDirName(file), version);
