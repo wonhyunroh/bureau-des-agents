@@ -15,6 +15,10 @@ import { ClaudeProcess, Normalizer, type ClaudeBinary, type TurnResult } from '.
 import { agentsJson, ALWAYS_ALLOWED, chefPrompt, PROJECT_ALLOWED, SESSION_TOOLS } from './team.ts';
 
 const RULES_FILE = 'Règlement du bureau.md';
+/** Ce que le chef a appris de toi, mission après mission (il l'écrit dans la mission, le bureau le range ici). */
+const LESSONS_FILE = '배운 점.md';
+const LESSONS_DROP = '.bureau-lessons.md';
+const LESSONS_HEAD = '# 대표님에게 배운 점\n\n팀장이 미션마다 먼저 읽어요. 지적하신 내용이 한 줄 규칙으로 쌓여요. 틀린 줄은 지우거나 고쳐도 돼요.\n\n';
 
 const RULES_TEMPLATE = `# 사무실 규칙
 
@@ -78,6 +82,8 @@ interface Current {
   busySince: number | null;
   stopAsked: boolean;
   lastChefText: string;
+  /** un fichier de leçons était déjà là au départ (un projet pourrait le piéger) : on ne le ramasse jamais */
+  lessonsBlocked: boolean;
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -93,6 +99,14 @@ function titleOf(prompt: string) {
 const cleanName = (s: string) => s.replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().replace(/^\.+/, '');
 
 /** Le contenu du règlement, sans les commentaires d'exemple. */
+/** Les leçons apprises (les dernières, pour ne pas alourdir la séance). */
+function readLessons(dir: string) {
+  try {
+    const lines = readFileSync(path.join(dir, LESSONS_FILE), 'utf8').split('\n').filter((l) => l.trim().startsWith('-'));
+    return lines.slice(-60).join('\n').slice(-6000);
+  } catch { return ''; }
+}
+
 function readRules(dir: string) {
   try {
     return readFileSync(path.join(dir, RULES_FILE), 'utf8').replace(/<!--[\s\S]*?-->/g, '').slice(0, 20000);
@@ -211,6 +225,7 @@ export class Bureau {
     const cur: Current = {
       mission, log: [], live: null, names: new Set(), watcher: null, fileTimers: new Map(), idleTimer: null,
       busySince: Date.now(), stopAsked: false, lastChefText: '',
+      lessonsBlocked: existsSync(path.join(folder, LESSONS_DROP)),
     };
     this.current = cur;
     this.watch(cur);
@@ -251,6 +266,26 @@ export class Bureau {
     });
   }
 
+  /** Range les leçons que le chef vient d'écrire dans la mission (.bureau-lessons.md) dans « 배운 점.md », sans doublon. */
+  private async collectLessons(folder: string) {
+    const drop = path.join(folder, LESSONS_DROP);
+    const st = await lstat(drop).catch(() => null);
+    if (!st?.isFile() || st.size > 20_000) return;
+    try {
+      const fresh = (await readFile(drop, 'utf8')).split('\n').map((l) => l.trim()).filter((l) => l.startsWith('-') && l.length <= 300);
+      const file = path.join(this.dir, LESSONS_FILE);
+      const old = existsSync(file) ? await readFile(file, 'utf8') : LESSONS_HEAD;
+      const known = new Set(old.split('\n').map((l) => l.trim()));
+      const add = [...new Set(fresh)].filter((l) => !known.has(l));
+      if (add.length) {
+        await writeFile(file, old.replace(/\n*$/, '\n') + add.join('\n') + '\n');
+        // tu vois tout de suite ce que le chef a retenu (et tu peux l'effacer dans « 배운 점.md »)
+        this.broadcast({ t: 'toast', kind: 'info', text: `「배운 점」에 추가했어요: ${add.map((l) => l.replace(/^-\s*/, '')).join(' / ').slice(0, 300)}` });
+      }
+      await unlink(drop);
+    } catch { /* on réessaiera à la fin de la prochaine réponse */ }
+  }
+
   /** Parler à Max : la mission, puis les retouches. S'il s'était endormi, il reprend sa séance. */
   say(text: string) {
     const cur = this.current;
@@ -289,7 +324,7 @@ export class Bureau {
       {
         bin: this.claude.path, cwd: cur.mission.folder, permissionMode: s.permission === 'ask' ? 'acceptEdits' : 'auto',
         model: s.chefModel || undefined, resume, tools: SESSION_TOOLS, allowedTools: cur.mission.project ? PROJECT_ALLOWED : ALWAYS_ALLOWED,
-        agents: agentsJson(s), appendSystemPrompt: chefPrompt(readRules(this.dir), cur.mission.project === true), useApiKey: process.env.BUREAU_USE_API_KEY === '1',
+        agents: agentsJson(s), appendSystemPrompt: chefPrompt(readRules(this.dir), cur.mission.project === true, readLessons(this.dir)), useApiKey: process.env.BUREAU_USE_API_KEY === '1',
       },
       (m) => {
         if (cur.live?.proc !== proc) return; // un ancien processus qui parle encore
@@ -343,6 +378,7 @@ export class Bureau {
     const l = cur.live;
     if (l) for (const id of l.norm.pendingRequests()) { l.norm.forgetRequest(id); this.record(cur, { k: 'ask_done', requestId: id, allow: false, cancelled: true }); }
     this.record(cur, { k: 'end', ok, text: m.final ?? '', ms, stopped });
+    if (!cur.lessonsBlocked) void this.collectLessons(m.folder);
     this.broadcast({ t: 'mission', mission: m });
     this.save();
     // Max reste disponible un moment pour les retouches, puis s'endort (il reprendra sa séance si on lui reparle)
