@@ -103,6 +103,8 @@ export type ClientMsg =
   | { t: 'start'; prompt: string; folder?: string }
   /** ouvre la fenêtre « choisir un dossier » du Mac */
   | { t: 'pick_folder' }
+  /** garder (ou jeter) les leçons que le chef propose */
+  | { t: 'lessons'; accept: boolean }
   | { t: 'say'; text: string }
   | { t: 'stop' }
   | { t: 'answer'; requestId: string; allow: boolean }
@@ -129,4 +131,6 @@ export type ServerMsg =
   | { t: 'quota'; quota: Quota }
   | { t: 'settings'; settings: Settings }
   | { t: 'toast'; kind: 'info' | 'error'; text: string }
-  | { t: 'picked_folder'; folder: string | null };
+  | { t: 'picked_folder'; folder: string | null }
+  /** les leçons que le chef propose, en attente de ton accord (vide : plus rien à décider) */
+  | { t: 'lessons'; pending: string[] };

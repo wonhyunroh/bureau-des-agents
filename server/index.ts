@@ -127,6 +127,7 @@ wss.on('connection', (ws) => {
   ws.on('close', () => clients.delete(ws));
   const send = (m: ServerMsg) => ws.readyState === ws.OPEN && ws.send(JSON.stringify(m));
   send({ ...bureau.hello(), build: BUILD } as ServerMsg);
+  if (bureau.pendingLessons.length) send({ t: 'lessons', pending: bureau.pendingLessons });
   ws.on('message', async (data) => {
     let m: ClientMsg;
     try { m = JSON.parse(String(data)); } catch { return; }
@@ -183,6 +184,9 @@ async function handle(m: ClientMsg, send: (m: ServerMsg) => void) {
       send({ t: 'replay', mission, log });
       break;
     }
+    case 'lessons':
+      await bureau.answerLessons(m.accept === true);
+      break;
     case 'pick_folder':
       send({ t: 'picked_folder', folder: await bureau.pickFolder() });
       break;

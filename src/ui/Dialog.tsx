@@ -117,6 +117,24 @@ export function Dialog() {
   );
 }
 
+/** Les leçons que 관우 veut retenir : elles n'entrent dans « 배운 점 » que si tu les gardes. */
+export function LessonsBar() {
+  const lessons = useOffice(useShallow((s) => s.lessons));
+  const send = useOffice((s) => s.send);
+  if (!lessons.length) return null;
+  const answer = (accept: boolean) => { sfx(accept ? 'yes' : 'no'); send({ t: 'lessons', accept }); };
+  return (
+    <div className="askbar">
+      <div className="askbar-head">📝 <b>관우</b> · 다음 미션부터 기억할까요?</div>
+      {lessons.map((l) => <div key={l} className="askbar-label">{l.replace(/^-\s*/, '')}</div>)}
+      <div className="askbar-actions">
+        <button className="btn primary" onClick={() => answer(true)}>기억하기</button>
+        <button className="btn" onClick={() => answer(false)}>버리기</button>
+      </div>
+    </div>
+  );
+}
+
 export function AskBar() {
   const asks = useOffice(useShallow((s) => Object.values(s.asks)));
   const agents = useOffice((s) => s.agents);

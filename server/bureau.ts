@@ -135,6 +135,8 @@ export class Bureau {
   private state: State = { missions: [], settings: { ...DEFAULT_SETTINGS } };
   private saveTimer: NodeJS.Timeout | null = null;
   current: Current | null = null;
+  /** les leçons proposées par le chef : rien n'entre dans « 배운 점.md » sans ton accord */
+  pendingLessons: string[] = [];
   quota: Quota | null = null;
 
   private claude: ClaudeBinary | null;
@@ -266,6 +268,20 @@ export class Bureau {
     });
   }
 
+  /** Ta réponse aux leçons proposées : on les ajoute à « 배운 점.md », ou on les oublie. */
+  async answerLessons(accept: boolean) {
+    const add = this.pendingLessons;
+    this.pendingLessons = [];
+    if (accept && add.length) {
+      const file = path.join(this.dir, LESSONS_FILE);
+      const old = existsSync(file) ? await readFile(file, 'utf8') : LESSONS_HEAD;
+      const known = new Set(old.split('\n').map((l) => l.trim()));
+      const fresh = add.filter((l) => !known.has(l));
+      if (fresh.length) await writeFile(file, old.replace(/\n*$/, '\n') + fresh.join('\n') + '\n');
+    }
+    this.broadcast({ t: 'lessons', pending: [] });
+  }
+
   /** Range les leçons que le chef vient d'écrire dans la mission (.bureau-lessons.md) dans « 배운 점.md », sans doublon. */
   private async collectLessons(folder: string) {
     const drop = path.join(folder, LESSONS_DROP);
@@ -276,11 +292,11 @@ export class Bureau {
       const file = path.join(this.dir, LESSONS_FILE);
       const old = existsSync(file) ? await readFile(file, 'utf8') : LESSONS_HEAD;
       const known = new Set(old.split('\n').map((l) => l.trim()));
-      const add = [...new Set(fresh)].filter((l) => !known.has(l));
+      const add = [...new Set(fresh)].filter((l) => !known.has(l) && !this.pendingLessons.includes(l));
       if (add.length) {
-        await writeFile(file, old.replace(/\n*$/, '\n') + add.join('\n') + '\n');
-        // tu vois tout de suite ce que le chef a retenu (et tu peux l'effacer dans « 배운 점.md »)
-        this.broadcast({ t: 'toast', kind: 'info', text: `「배운 점」에 추가했어요: ${add.map((l) => l.replace(/^-\s*/, '')).join(' / ').slice(0, 300)}` });
+        // une page web ou un fichier piégé pourrait souffler une « leçon » au chef : c'est toi qui décides
+        this.pendingLessons = [...this.pendingLessons, ...add].slice(-10);
+        this.broadcast({ t: 'lessons', pending: this.pendingLessons });
       }
       await unlink(drop);
     } catch { /* on réessaiera à la fin de la prochaine réponse */ }

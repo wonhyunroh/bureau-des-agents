@@ -5,7 +5,7 @@ import { jukebox } from './audio/music.ts';
 import { sfx } from './audio/sfx.ts';
 import { applySound } from './audio/sound.ts';
 import { savePref, useOffice, type Tod } from './state/store.ts';
-import { AskBar, Dialog } from './ui/Dialog.tsx';
+import { AskBar, Dialog, LessonsBar } from './ui/Dialog.tsx';
 import { FinalCard, History, SettingsPanel, Toasts, Viewer } from './ui/Modals.tsx';
 import { Office } from './ui/Office.tsx';
 import { Panel } from './ui/Panel.tsx';
@@ -96,6 +96,7 @@ export function App() {
             <Office />
             {vertical && <Strips />}
             <AskBar />
+            <LessonsBar />
             <FinalCard />
           </div>
           {!vertical && !filming && <Panel />}

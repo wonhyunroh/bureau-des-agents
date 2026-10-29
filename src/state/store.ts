@@ -93,6 +93,8 @@ interface S {
   voiceOn: boolean;
   /** le projet existant où lancer la prochaine mission (null : un dossier neuf) */
   project: string | null;
+  /** les leçons que le chef propose, en attente de ton accord */
+  lessons: string[];
   /** en mode tournage, la caméra suit l'action toute seule */
   cameraAuto: boolean;
   /** la visite guidée en cours (le texte que Max dit) */
@@ -158,6 +160,7 @@ export const useOffice = create<S>((set, get) => ({
   music: { playing: false, index: 0, volume: 0.55 },
   voiceOn: pref('voice', true),
   project: pref<string | null>('project', null),
+  lessons: [],
   cameraAuto: pref('cameraAuto', true),
   tour: null,
   subtitle: null,
@@ -231,6 +234,9 @@ export const useOffice = create<S>((set, get) => ({
         break;
       case 'toast':
         get().toast(m.kind, m.text);
+        break;
+      case 'lessons':
+        set({ lessons: m.pending });
         break;
       case 'picked_folder':
         if (m.folder) { set({ project: m.folder }); savePref('project', m.folder); }
