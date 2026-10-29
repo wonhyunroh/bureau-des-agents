@@ -46,7 +46,8 @@ export const ZONES: Zone[] = [
   { role: 'design', label: '디자인 스튜디오', x: 15, y: 6, w: 6, h: 3 },
   { role: 'redaction', label: '글쓰기', x: 1, y: 10, w: 6, h: 3 },
   { role: 'analyse', label: '분석', x: 15, y: 10, w: 4, h: 3 },
-  { role: 'chef', label: '강지영, 팀장', x: 9, y: 6, w: 4, h: 3 },
+  { role: 'verif', label: '검수', x: 19, y: 10, w: 2, h: 3 },
+  { role: 'chef', label: '관우, 팀장', x: 9, y: 6, w: 4, h: 3 },
 ];
 
 const furn: Furn[] = [];
@@ -69,6 +70,8 @@ for (const tx of [15, 17]) desk('design', tx, 8);
 for (const tx of [1, 3, 5]) desk('redaction', tx, 12);
 // Analyse
 for (const tx of [15, 17]) desk('analyse', tx, 12);
+// Vérification : un bureau, à côté de l'analyse (là où était la plante)
+desk('verif', 19, 12);
 
 // Le bureau du chef, face à toi
 furn.push({ id: 'chefDesk', kind: 'chefDesk', tx: 9, ty: 7, w: 4, h: 1, role: 'chef' });
@@ -83,7 +86,6 @@ furn.push({ id: 'easel', kind: 'easel', tx: 19, ty: 8, w: 1, h: 1 });
 furn.push({ id: 'plant-design', kind: 'plantBig', tx: 20, ty: 8, w: 1, h: 1, seed: 3 });
 furn.push({ id: 'plant-entry-l', kind: 'plantTall', tx: 8, ty: 14, w: 1, h: 1, seed: 5 });
 furn.push({ id: 'plant-entry-r', kind: 'plantBig', tx: 13, ty: 14, w: 1, h: 1, seed: 9 });
-furn.push({ id: 'plant-analyse', kind: 'plantTall', tx: 20, ty: 11, w: 1, h: 1, seed: 11 });
 furn.push({ id: 'sofa', kind: 'sofa', tx: 2, ty: 14, w: 3, h: 1 });
 furn.push({ id: 'tableLow', kind: 'tableLow', tx: 2, ty: 13, w: 2, h: 0 });
 furn.push({ id: 'lamp', kind: 'lamp', tx: 1, ty: 14, w: 1, h: 1 });

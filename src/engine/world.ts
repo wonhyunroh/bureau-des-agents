@@ -143,7 +143,7 @@ export class World {
     this.assignments = [];
     this.planSize = -1;
     const p = SPOTS.receptionPx;
-    this.actors.set('chef', new Actor('chef', 'chef', '강지영', p.x, p.y));
+    this.actors.set('chef', new Actor('chef', 'chef', '관우', p.x, p.y));
     this.rosterChanged();
   }
 
@@ -455,7 +455,7 @@ export class World {
     for (const until of this.wiggles.values()) if (until > this.time) moving = true;
     for (const a of this.actors.values()) {
       if (a.id.startsWith('demo-') && this.time - a.actAt > 2 + Math.random() * 3) {
-        const kinds: ActKind[] = a.role === 'recherche' ? ['search', 'web'] : a.role === 'code' ? ['write', 'bash'] : a.role === 'analyse' ? ['read', 'write'] : ['write', 'edit'];
+        const kinds: ActKind[] = a.role === 'recherche' ? ['search', 'web'] : a.role === 'code' ? ['write', 'bash'] : a.role === 'analyse' ? ['read', 'write'] : a.role === 'verif' ? ['read', 'bash'] : ['write', 'edit'];
         a.act = kinds[Math.floor(Math.random() * kinds.length)];
         a.actAt = this.time;
         this.fx.floatIcon(a.x, a.y - 24, iconFor(a.act));

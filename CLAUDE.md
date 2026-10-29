@@ -37,7 +37,7 @@ fournit le rythme de la musique (voir la boucle de `Office.tsx`).
 
 ## Les règles
 
-- **Coréen (해요체), phrases courtes** dans tout ce que l'utilisateur lit, y compris les consignes des agents (`server/team.ts`) : c'est la version coréenne. Le chef s'appelle 강지영. Les commentaires du code restent en français. Le bureau est fait pour des débutants.
+- **Coréen (해요체), phrases courtes** dans tout ce que l'utilisateur lit, y compris les consignes des agents (`server/team.ts`) : c'est la version coréenne. Le chef s'appelle 관우. Les commentaires du code restent en français. Le bureau est fait pour des débutants.
 - **Jamais de chemin complet ni de nom d'utilisateur à l'écran** : `tidy()` (`src/ui/tidy.ts`) et `tilde()` (`src/ui/format.ts`).
 - **Léger** : la boucle dessine au plus 24 images par seconde en mission, 8 au repos, rien quand l'onglet est caché ; environ une
   milliseconde par image. Pas de 3D, pas de bibliothèque lourde.

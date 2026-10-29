@@ -52,8 +52,8 @@ function Welcome() {
       <section className="card">
         <h3>이렇게 사용해요</h3>
         <ol className="steps">
-          <li><b>강지영에게 원하는 걸 말해요</b>. 키보드나 음성으로요.</li>
-          <li><b>강지영이 계획을 세우고 팀을 불러요</b>. 각자 자리로 가요(리서치, 코드, 디자인, 글쓰기, 분석).</li>
+          <li><b>관우에게 원하는 걸 말해요</b>. 키보드나 음성으로요.</li>
+          <li><b>관우가 계획을 세우고 팀을 불러요</b>. 각자 자리로 가요(리서치, 코드, 디자인, 글쓰기, 분석). 끝나기 전에 검수자가 확인해요.</li>
           <li><b>일하는 모습을 지켜봐요</b>. 말풍선 하나하나가 에이전트가 지금 실제로 하는 일이에요.</li>
           <li><b>결과물을 받아요</b>. 파일이 「결과물」과 내 폴더에 도착해요.</li>
         </ol>
@@ -73,7 +73,7 @@ function Welcome() {
             <button className="btn small" onClick={() => send({ t: 'open_root' })}>폴더 열기</button>
             <button className="btn small" onClick={() => send({ t: 'open_root', rules: true })}>사무실 규칙</button>
           </div>
-          <p className="small muted">규칙은 팀이 나에 대해 알아야 할 내용이에요. 강지영이 미션마다 먼저 읽어요.</p>
+          <p className="small muted">규칙은 팀이 나에 대해 알아야 할 내용이에요. 관우가 미션마다 먼저 읽어요.</p>
         </section>
       )}
       {missions.length > 0 && (
@@ -115,7 +115,7 @@ function TeamSection() {
     return (
       <section className="card">
         <h3>팀</h3>
-        <p className="small muted">강지영이 요청을 읽고 누구를 부를지 고르는 중이에요…</p>
+        <p className="small muted">관우가 요청을 읽고 누구를 부를지 고르는 중이에요…</p>
       </section>
     );
   }
@@ -147,7 +147,7 @@ function AgentCard({ a, open, onToggle }: { a: AgentView; open: boolean; onToggl
       </button>
       {open && (
         <div className="agent-more">
-          <h4>맡은 미션 (강지영 작성)</h4>
+          <h4>맡은 미션 (관우 작성)</h4>
           <p className="brief">{a.prompt}</p>
           {a.acts.length > 0 && (
             <>

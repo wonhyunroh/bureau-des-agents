@@ -140,7 +140,7 @@ function whiteboard(g: G) {
   pixelText(g, '작전', x + 4, y + 1, P.orangeDark);
 }
 
-export const SIGN: Record<string, string> = { recherche: '리서치', code: '코드', design: '디자인', redaction: '글쓰기', analyse: '분석', chef: '팀장' };
+export const SIGN: Record<string, string> = { recherche: '리서치', code: '코드', design: '디자인', redaction: '글쓰기', analyse: '분석', verif: '검수', chef: '팀장' };
 
 /** Les écriteaux posés au coin de chaque tapis, avec le nombre d'agents au travail dans le coin. */
 export function signs(g: G, busy: (role: string) => number) {

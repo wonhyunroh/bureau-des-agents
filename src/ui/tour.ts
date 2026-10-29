@@ -5,7 +5,7 @@ import { camera, world } from '../engine/instance.ts';
 import { useOffice } from '../state/store.ts';
 
 const STEPS: { line: Line; text: string; shot: [number, number, number] }[] = [
-  { line: 'visite-1', text: '제 사무실에 오신 걸 환영해요! 저는 팀장 강지영이에요. 여기서는 AI 에이전트 팀이 밤낮없이 대표님을 위해 일해요.', shot: [176, 186, 1.9] },
+  { line: 'visite-1', text: '제 사무실에 오신 걸 환영해요! 저는 팀장 관우예요. 여기서는 AI 에이전트 팀이 밤낮없이 대표님을 위해 일해요.', shot: [176, 186, 1.9] },
   { line: 'visite-2', text: '저기는 리서치 팀이에요. 리서처들이 인터넷을 샅샅이 뒤져요. 가격, 경쟁사, 고객 후기까지요.', shot: [64, 104, 1.7] },
   { line: 'visite-3', text: '여기는 코드 작업실이에요. 웹사이트, 도구, 자동화를 만들어요.', shot: [288, 76, 1.95] },
   { line: 'visite-4', text: '디자인 스튜디오예요. 예뻐야 하는 건 전부 여기를 거쳐요.', shot: [276, 124, 1.95] },

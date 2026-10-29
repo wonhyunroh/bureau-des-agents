@@ -255,7 +255,7 @@ function Bubbles() {
     const isChef = id === 'chef';
     const a = isChef ? null : agents[id];
     const role = isChef ? 'chef' : a?.role ?? actor?.role ?? 'renfort';
-    const base = { name: isChef ? '강지영' : a?.name ?? actor?.name ?? '', color: ROLES[role].color };
+    const base = { name: isChef ? '관우' : a?.name ?? actor?.name ?? '', color: ROLES[role].color };
     // l'équipe de démonstration de la visite guidée : juste les prénoms
     if (!isChef && !a && actor) return { ...base, mode: filming ? 'none' : 'tag' };
     const ask = askOf(id);

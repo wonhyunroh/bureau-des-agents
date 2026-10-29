@@ -18,7 +18,7 @@ const RULES_FILE = 'Règlement du bureau.md';
 
 const RULES_TEMPLATE = `# 사무실 규칙
 
-팀장 강지영은 미션을 시작하기 전에 항상 이 파일을 읽어요. 팀이 대표님에 대해 알아야 할 것을
+팀장 관우는 미션을 시작하기 전에 항상 이 파일을 읽어요. 팀이 대표님에 대해 알아야 할 것을
 새 동료들에게 설명하듯 편하게 적어 주세요.
 
 ## 저는 누구인가요
@@ -34,7 +34,7 @@ const README = `# 에이전트 사무실
 
 여기서 대표님의 AI 에이전트 팀(Claude Code 에이전트)이 일해요.
 
-- "Règlement du bureau.md": 사무실 규칙이에요. 팀이 대표님에 대해 알아야 할 것을 적어 두면, 팀장 강지영이 미션마다 읽어요.
+- "Règlement du bureau.md": 사무실 규칙이에요. 팀이 대표님에 대해 알아야 할 것을 적어 두면, 팀장 관우가 미션마다 읽어요.
 - "Missions": 미션마다 폴더가 하나씩 있어요. 팀이 만든 모든 것(보고서, 웹 페이지, 글)이 여기에 정리돼요.
 
 숨김 폴더 ".bureau"에는 사무실 상태와 각 미션의 기록이 저장돼 있어서 다시 재생할 수 있어요.
@@ -186,7 +186,7 @@ export class Bureau {
   // ── Une nouvelle mission ──
   async start(prompt: string, projectFolder?: string) {
     const text = prompt.trim();
-    if (!text) throw new Error('강지영에게 원하는 걸 말해 주세요.');
+    if (!text) throw new Error('관우에게 원하는 걸 말해 주세요.');
     if (!this.claude) throw new Error('이 컴퓨터에 Claude Code가 설치되어 있지 않아요.');
     if (this.current?.mission.status === 'working') throw new Error('팀이 이미 미션을 진행 중이에요. 끝날 때까지 기다리거나 미션을 멈춰 주세요.');
     if (this.current) this.close();
@@ -241,7 +241,7 @@ export class Bureau {
   /** La fenêtre « choisir un dossier » du Mac. null si on annule. */
   pickFolder(): Promise<string | null> {
     if (process.platform !== 'darwin') return Promise.reject(new Error('폴더 선택 창은 macOS에서만 열 수 있어요.'));
-    const script = ['activate', 'POSIX path of (choose folder with prompt "강지영 팀이 작업할 프로젝트 폴더를 골라 주세요")'];
+    const script = ['activate', 'POSIX path of (choose folder with prompt "관우 팀이 작업할 프로젝트 폴더를 골라 주세요")'];
     return new Promise((resolve, reject) => {
       execFile('osascript', script.flatMap((l) => ['-e', l]), { timeout: 10 * 60_000 }, (err, stdout) => {
         if (err) return (err as NodeJS.ErrnoException & { code?: number }).code === 1 ? resolve(null) : reject(new Error('폴더 선택 창을 열지 못했어요.'));

@@ -163,6 +163,11 @@ function deskSprite(role: Role, seed: number): Sprite {
       dashboard(g, 22, 1);
       calculator(g, 2, 9);
       break;
+    case 'verif':
+      laptop(g, 10, 8);
+      papers(g, 2, 10, 2);
+      mug(g, 24, 11, ROLES.verif.color);
+      break;
     default:
       laptop(g, 10, 8);
   }

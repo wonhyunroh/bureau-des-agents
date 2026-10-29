@@ -106,14 +106,14 @@ export function TopBar() {
             <span className="energy-bar"><i style={{ width: `${Math.max(3, 100 - quota.fiveHour * 100)}%` }} /></span>
           </span>
         )}
-        <button className="icon-btn" title="사무실 투어: 강지영이 사무실을 소개해요 (T)" onClick={() => void startTour()}>🎤</button>
+        <button className="icon-btn" title="사무실 투어: 관우가 사무실을 소개해요 (T)" onClick={() => void startTour()}>🎤</button>
         <button className="icon-btn" title="팀 전체: 역할, 도구, 기록" onClick={() => { sfx('open'); useOffice.setState({ modal: { kind: 'team' } }); }}>👥</button>
         <button className={`icon-btn ${musicOn ? 'on' : ''}`} title="주크박스 (J)" onClick={() => { sfx('open'); useOffice.setState({ modal: { kind: 'jukebox' } }); }}>{musicOn ? '🎶' : '🎵'}</button>
         <button className="icon-btn" title="지난 미션 (H)" onClick={() => { sfx('open'); useOffice.setState({ historyOpen: true }); }}>🗂️</button>
         <button className="icon-btn" title={`사무실 시간: ${TOD_LABEL[tod]} (N)`} onClick={() => { sfx('click'); const n = TOD_NEXT[tod]; useOffice.setState({ tod: n }); savePref('tod', n); }}>{TOD_ICON[tod]}</button>
         <button className="icon-btn" title={sound ? '소리 끄기 (M)' : '소리 켜기 (M)'} onClick={() => toggle('sound')}>{sound ? '🔊' : '🔇'}</button>
         <button className={`icon-btn ${vertical ? 'on' : ''}`} title="세로 9:16 화면, 릴스 촬영용 (V)" onClick={() => toggle('vertical')}>📱</button>
-        <button className={`icon-btn ${filming ? 'on' : ''}`} title="촬영 모드: 사무실과 강지영만 보여요 (F)" onClick={() => toggle('filming')}>🎬</button>
+        <button className={`icon-btn ${filming ? 'on' : ''}`} title="촬영 모드: 사무실과 관우만 보여요 (F)" onClick={() => toggle('filming')}>🎬</button>
         <button className="icon-btn" title="설정" onClick={() => { sfx('open'); useOffice.setState({ settingsOpen: true }); }}>⚙️</button>
       </div>
     </header>

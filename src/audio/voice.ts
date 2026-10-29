@@ -1,4 +1,4 @@
-// La voix de 강지영 (ElevenLabs, en coréen, dans public/voice/ko ; les .mp3 d’origine en français restent dans public/voice) : la visite guidée du bureau, et quelques répliques
+// La voix de 관우 (ElevenLabs, en coréen, dans public/voice/ko ; les .mp3 d’origine en français restent dans public/voice) : la visite guidée du bureau, et quelques répliques
 // pendant les missions. La musique baisse pendant qu'il parle.
 import { jukebox } from './music.ts';
 

@@ -93,7 +93,7 @@ export function Dialog() {
   else if (subtitle) text = subtitle;
   else if (connection === 'offline') text = 'Claude Code와 연결되어 있지 않아요. 사무실 폴더에서 「npm start」를 실행하면 바로 일을 시작할게요.';
   else if (claude && !claude.found) text = '이 컴퓨터에서 Claude Code를 찾을 수 없어요. 설치하고(claude.com/claude-code) 로그인한 다음, 사무실을 다시 실행해 주세요.';
-  else if (!mission) text = '안녕하세요! 저는 이 사무실 팀장 강지영이에요. 필요한 걸 말씀해 주세요. 팀을 꾸려서 눈앞에서 바로 일을 시작할게요.';
+  else if (!mission) text = '안녕하세요! 저는 이 사무실 팀장 관우예요. 필요한 걸 말씀해 주세요. 팀을 꾸려서 눈앞에서 바로 일을 시작할게요.';
   else if (chef.typing) text = stripMd(chef.typing);
   else if (final && !busy) text = stripMd(final.text) || (final.ok ? '다 됐어요!' : '미션이 중단됐어요.');
   else if (chef.say) text = stripMd(chef.say);
@@ -108,7 +108,7 @@ export function Dialog() {
       <div className="dialog-box">
         <div className="dialog-face"><Portrait happy={!!final?.ok && !busy} /></div>
         <div className="dialog-main">
-          <div className="dialog-name">강지영 <span>팀장</span>{replaying && <em className="pill replay">다시 재생</em>}</div>
+          <div className="dialog-name">관우 <span>팀장</span>{replaying && <em className="pill replay">다시 재생</em>}</div>
           <div className="dialog-text" ref={box}>{out}<span className="caret" /></div>
         </div>
       </div>
@@ -123,7 +123,7 @@ export function AskBar() {
   const send = useOffice((s) => s.send);
   const a = asks[0];
   if (!a) return null;
-  const who = a.who === 'chef' ? '강지영' : agents[a.who]?.name ?? '에이전트';
+  const who = a.who === 'chef' ? '관우' : agents[a.who]?.name ?? '에이전트';
   const role = a.who === 'chef' ? 'chef' : agents[a.who]?.role ?? 'renfort';
   const answer = (allow: boolean) => { sfx(allow ? 'yes' : 'no'); send({ t: 'answer', requestId: a.requestId, allow }); };
   return (
@@ -165,8 +165,8 @@ function Composer() {
 
   const mode: 'new' | 'steer' | 'retouch' = !mission ? 'new' : busy ? 'steer' : 'retouch';
   const placeholder = mode === 'new'
-    ? '강지영에게 원하는 걸 말해 주세요… (예: 경쟁사 5곳 분석해 줘)'
-    : mode === 'steer' ? '강지영에게 덧붙일 말이 있나요? 단계 사이에 읽어 볼게요.' : '강지영에게 수정을 요청하거나… 새 미션을 시작해 보세요.';
+    ? '관우에게 원하는 걸 말해 주세요… (예: 경쟁사 5곳 분석해 줘)'
+    : mode === 'steer' ? '관우에게 덧붙일 말이 있나요? 단계 사이에 읽어 볼게요.' : '관우에게 수정을 요청하거나… 새 미션을 시작해 보세요.';
 
   const submit = () => {
     const t = text.trim();

@@ -19,6 +19,7 @@ export const ROLES: Record<Role, RoleInfo> = {
   design: { label: '디자인', icon: '🎨', color: '#FF6FA8', type: 'designer', what: '완성도 높은 웹 페이지, 시안, 비주얼, 꾸미기.' },
   redaction: { label: '글쓰기', icon: '✍️', color: '#A98BFF', type: 'redacteur', what: 'SNS 게시물, 이메일, 기사, 영상 대본, 보고서.' },
   analyse: { label: '분석', icon: '📊', color: '#FFC93D', type: 'analyste', what: '숫자, 표, 파일, 비교, 계산.' },
+  verif: { label: '검수', icon: '✅', color: '#FF6B5B', type: 'verificateur', what: '결과물이 요청에 맞는지, 출처와 숫자가 맞는지, 코드가 실제로 작동하는지 확인해요.' },
   renfort: { label: '지원', icon: '🤖', color: '#9AA3B5', type: '', what: '따로 떨어진 작업을 도와줘요.' },
 };
 
@@ -30,6 +31,8 @@ export const ROLE_TOOLS: Record<Role, string[]> = {
   design: ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'WebFetch'],
   redaction: ['Read', 'Write', 'Edit', 'Glob', 'Grep'],
   analyse: ['Read', 'Write', 'Edit', 'Glob', 'Grep', 'Bash'],
+  // le vérificateur relit et teste, mais ne retouche rien : il signale, le chef corrige
+  verif: ['Read', 'Glob', 'Grep', 'Bash', 'WebFetch'],
   renfort: [],
 };
 
@@ -48,12 +51,13 @@ export function roleOfType(type: string): Role {
 
 /** Les prénoms des robots, par métier (jamais deux fois le même dans une mission). */
 export const NAMES: Record<Role, string[]> = {
-  chef: ['강지영'],
+  chef: ['관우'],
   recherche: ['Iris', 'Hugo', 'Léa', 'Malo', 'Zoé', 'Noé', 'Inès', 'Tom', 'Jade', 'Sacha', 'Lou', 'Nils'],
   code: ['Ada', 'Linus', 'Grace', 'Alan', 'Margaret', 'Dennis'],
   design: ['Frida', 'Coco', 'Henri', 'Sonia', 'Saul'],
   redaction: ['Colette', 'Victor', 'Simone', 'Jules', 'George'],
   analyse: ['Marie', 'Blaise', 'Émilie', 'Gaspard', 'Ada'],
+  verif: ['Sherlock', 'Agatha', 'Poirot', 'Columbo'],
   renfort: ['Bob', 'Lulu', 'Gaston', 'Nina', 'Momo', 'Kiki'],
 };
 

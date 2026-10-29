@@ -247,7 +247,7 @@ export const useOffice = create<S>((set, get) => ({
       const line: FeedLine = { id: ++feedId, at, who, text, kind };
       return [...get().feed, line].slice(-MAX_FEED);
     };
-    const agentName = (who: string) => (who === 'chef' ? '강지영' : s.agents[who]?.name ?? '에이전트');
+    const agentName = (who: string) => (who === 'chef' ? '관우' : s.agents[who]?.name ?? '에이전트');
     switch (ev.k) {
       case 'start': {
         const first = s.feed.length === 0;
@@ -269,7 +269,7 @@ export const useOffice = create<S>((set, get) => ({
         else if (s.agents[ev.who]) set({ agents: { ...s.agents, [ev.who]: { ...s.agents[ev.who], say: ev.text, sayAt: at } } });
         break;
       case 'say':
-        if (ev.who === 'chef') set({ chef: { ...s.chef, say: ev.text, sayAt: at, typing: '' }, feed: feed('강지영', ev.text, 'chef') });
+        if (ev.who === 'chef') set({ chef: { ...s.chef, say: ev.text, sayAt: at, typing: '' }, feed: feed('관우', ev.text, 'chef') });
         else if (s.agents[ev.who]) set({ agents: { ...s.agents, [ev.who]: { ...s.agents[ev.who], say: ev.text, sayAt: at } } });
         break;
       case 'plan':
@@ -285,7 +285,7 @@ export const useOffice = create<S>((set, get) => ({
         const stats = { ...s.stats };
         countStats(stats, ev);
         const firstOfRound = !s.order.some((id) => s.agents[id]?.status === 'working' || s.agents[id]?.status === 'reporting');
-        set({ agents: { ...s.agents, [ev.id]: a }, order: [...s.order, ev.id], stats, feed: feed('강지영', `${ev.name} 호출: ${ev.task}`, 'hire') });
+        set({ agents: { ...s.agents, [ev.id]: a }, order: [...s.order, ev.id], stats, feed: feed('관우', `${ev.name} 호출: ${ev.task}`, 'hire') });
         if (live) sfx('spawn');
         if (live && firstOfRound) void say('equipe');
         break;
@@ -312,7 +312,7 @@ export const useOffice = create<S>((set, get) => ({
       case 'report': {
         const a = s.agents[ev.who];
         if (!a) break;
-        set({ agents: { ...s.agents, [ev.who]: { ...a, report: ev.text, status: 'reporting' } }, feed: feed(a.name, '강지영에게 보고서 제출', 'report') });
+        set({ agents: { ...s.agents, [ev.who]: { ...a, report: ev.text, status: 'reporting' } }, feed: feed(a.name, '관우에게 보고서 제출', 'report') });
         if (live) sfx('paper');
         break;
       }
@@ -344,7 +344,7 @@ export const useOffice = create<S>((set, get) => ({
         const workMs = s.workMs + (s.busySince ? Math.max(0, at - s.busySince) : 0);
         set({
           final: { ok: ev.ok, text: ev.text, ms: ev.ms, stopped: ev.stopped, at }, busySince: null, workMs, asks: {},
-          showFinal: false, feed: feed('강지영', ev.ok ? '미션 완료!' : ev.stopped ? '미션을 멈췄어요.' : '미션이 잘 끝나지 않았어요.', 'end'),
+          showFinal: false, feed: feed('관우', ev.ok ? '미션 완료!' : ev.stopped ? '미션을 멈췄어요.' : '미션이 잘 끝나지 않았어요.', 'end'),
         });
         if (live) sfx(ev.ok ? 'done' : 'error');
         if (live && ev.ok) setTimeout(() => { void say('accomplie', true); }, 900);
@@ -353,7 +353,7 @@ export const useOffice = create<S>((set, get) => ({
         break;
       }
       case 'error':
-        set({ feed: feed('강지영', ev.message, 'error') });
+        set({ feed: feed('관우', ev.message, 'error') });
         if (live) get().toast('error', ev.message);
         break;
     }

@@ -92,7 +92,7 @@ export function Viewer() {
                 <option value="">현재 버전</option>
                 {versions.slice(1).map((v, i) => (
                   <option key={v.id} value={v.id}>
-                    v{versions.length - 1 - i} · {new Date(v.at).toLocaleString('ko-KR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' })} · {v.by === 'chef' ? '강지영' : agents[v.by]?.name ?? '팀'}
+                    v{versions.length - 1 - i} · {new Date(v.at).toLocaleString('ko-KR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', second: '2-digit' })} · {v.by === 'chef' ? '관우' : agents[v.by]?.name ?? '팀'}
                   </option>
                 ))}
               </select>
@@ -149,7 +149,7 @@ export function History() {
 }
 
 const CHEF_MODELS: [string, string][] = [['sonnet', 'Sonnet (빠름, 추천)'], ['opus', 'Opus (가장 섬세함)'], ['fable', 'Fable'], ['haiku', 'Haiku (번개처럼 빠름)'], ['', 'Claude Code 기본 모델']];
-const TEAM_MODELS: [string, string][] = [['sonnet', 'Sonnet (빠름, 추천)'], ['haiku', 'Haiku (번개처럼 빠름, 절약형)'], ['opus', 'Opus (가장 섬세함)'], ['fable', 'Fable'], ['inherit', '강지영과 같은 모델']];
+const TEAM_MODELS: [string, string][] = [['sonnet', 'Sonnet (빠름, 추천)'], ['haiku', 'Haiku (번개처럼 빠름, 절약형)'], ['opus', 'Opus (가장 섬세함)'], ['fable', 'Fable'], ['inherit', '관우와 같은 모델']];
 
 export function SettingsPanel() {
   const open = useOffice((s) => s.settingsOpen);
@@ -167,7 +167,7 @@ export function SettingsPanel() {
         <div className="modal-head"><b>사무실 설정</b><button className="close" onClick={close} aria-label="닫기">×</button></div>
         <div className="modal-body">
           <label className="field">
-            <span>강지영(팀장)의 두뇌</span>
+            <span>관우(팀장)의 두뇌</span>
             <select value={settings.chefModel} onChange={(e) => send({ t: 'settings', settings: { chefModel: e.target.value } })}>
               {CHEF_MODELS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select>
@@ -185,7 +185,7 @@ export function SettingsPanel() {
           </div>
           <div className="field">
             <span>연출</span>
-            <label className="radio"><input type="checkbox" checked={voiceOn} onChange={(e) => { useOffice.setState({ voiceOn: e.target.checked }); savePref('voice', e.target.checked); applySound(useOffice.getState().sound); }} /> 강지영의 목소리 (「시작해요!」, 「미션 완료!」, 사무실 투어)</label>
+            <label className="radio"><input type="checkbox" checked={voiceOn} onChange={(e) => { useOffice.setState({ voiceOn: e.target.checked }); savePref('voice', e.target.checked); applySound(useOffice.getState().sound); }} /> 관우의 목소리 (「시작해요!」, 「미션 완료!」, 사무실 투어)</label>
             <label className="radio"><input type="checkbox" checked={cameraAuto} onChange={(e) => { useOffice.setState({ cameraAuto: e.target.checked }); savePref('cameraAuto', e.target.checked); }} /> 촬영 모드에서 카메라가 알아서 움직임을 따라가요</label>
           </div>
           <p className="small muted">설정은 다음 미션부터 적용돼요. 팀은 미션 폴더 안에서만 일하고, 물어보지 않고는 사무실 밖에서 아무것도 실행하지 않아요.</p>

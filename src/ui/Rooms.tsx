@@ -64,12 +64,12 @@ function AgentRoom({ id }: { id: string }) {
         <Avatar role={a.role} size={72} />
         <div>
           <span className={`pill-status ${a.status}`}>{working ? (live?.seated ? '작업 중' : '이동 중') : a.status === 'done' ? '작업을 마쳤어요' : '끝내지 못했어요'}</span>
-          <p className="now">{working && a.act ? <><i>{ICON[a.act.kind]}</i>{a.act.label}</> : a.status === 'done' ? '보고서가 강지영 책상 위에 있어요.' : working ? '자리에 앉는 중…' : ''}</p>
-          <p className="small muted">진짜 Claude Code 서브에이전트(「{role.type || '지원'}」)예요. 자기만의 도구를 써요: {ROLE_TOOLS[a.role].join(', ') || '강지영과 같은 도구'}.</p>
+          <p className="now">{working && a.act ? <><i>{ICON[a.act.kind]}</i>{a.act.label}</> : a.status === 'done' ? '보고서가 관우 책상 위에 있어요.' : working ? '자리에 앉는 중…' : ''}</p>
+          <p className="small muted">진짜 Claude Code 서브에이전트(「{role.type || '지원'}」)예요. 자기만의 도구를 써요: {ROLE_TOOLS[a.role].join(', ') || '관우와 같은 도구'}.</p>
         </div>
       </div>
       <section className="room-sec">
-        <h4>강지영이 쓴 미션</h4>
+        <h4>관우가 쓴 미션</h4>
         <p className="brief">{tidy(a.prompt)}</p>
       </section>
       {a.acts.length > 0 && (
@@ -110,7 +110,7 @@ function ActList({ acts }: { acts: ActView[] }) {
 
 // ── Le tableau : le plan, qui fait quoi, et l'historique du plan ──
 function planChanges(prev: PlanItem[] | null, next: PlanItem[]): string[] {
-  if (!prev) return [`강지영이 계획을 세웠어요: ${next.length}단계`];
+  if (!prev) return [`관우가 계획을 세웠어요: ${next.length}단계`];
   const out: string[] = [];
   for (const it of next) {
     const before = prev.find((p) => p.text === it.text);
@@ -128,13 +128,13 @@ function BoardRoom() {
   const done = plan.filter((p) => p.status === 'completed').length;
   const steps = useMemo(() => history.map((h, i) => ({ at: h.at, lines: planChanges(i ? history[i - 1].items : null, h.items) })).filter((x) => x.lines.length), [history]);
   return (
-    <Shell title="강지영의 보드" sub={plan.length ? `${plan.length}단계 중 ${done}단계 완료` : '미션 계획과 누가 무엇을 하는지'}>
+    <Shell title="관우의 보드" sub={plan.length ? `${plan.length}단계 중 ${done}단계 완료` : '미션 계획과 누가 무엇을 하는지'}>
       {plan.length > 0 ? (
         <>
           <div className="progress"><i style={{ width: `${(done / plan.length) * 100}%` }} /></div>
           <ul className="plan big">{plan.map((p, i) => <li key={i} className={p.status}><i />{p.text}</li>)}</ul>
         </>
-      ) : <p className="muted">아직 계획이 없어요. 미션이 여러 단계면 강지영이 바로 계획을 세워요.</p>}
+      ) : <p className="muted">아직 계획이 없어요. 미션이 여러 단계면 관우가 바로 계획을 세워요.</p>}
       <section className="room-sec">
         <h4>누가 무엇을 하나요 <span className="count">{`에이전트 ${team.length}명`}</span></h4>
         {team.length ? (
@@ -212,8 +212,8 @@ function MachineRoom() {
   const rows: [string, React.ReactNode][] = [
     ['Claude Code', claude?.found ? `${claude.version} · ${claude.path}` : connection === 'demo' ? '데모 (실제 미션 다시 재생)' : '찾을 수 없어요'],
     ['연결', 'Claude 구독 (API 키 없음, 사용량 과금 없음)'],
-    ['강지영의 두뇌', mission?.model ? `${mission.model} (설정: ${settings.chefModel || '기본값'})` : settings.chefModel || '기본값'],
-    ['팀의 두뇌', settings.teamModel === 'inherit' ? '강지영과 같아요' : settings.teamModel],
+    ['관우의 두뇌', mission?.model ? `${mission.model} (설정: ${settings.chefModel || '기본값'})` : settings.chefModel || '기본값'],
+    ['팀의 두뇌', settings.teamModel === 'inherit' ? '관우와 같아요' : settings.teamModel],
     ['허락', settings.permission === 'auto' ? '자동: 위험한 작업만 손을 들고 물어봐요' : '명령마다 먼저 물어봐요'],
     ['에너지 (5시간)', quota ? `${Math.round(quota.fiveHour * 100)}% 사용${quota.resetsAt ? `, ${new Date(quota.resetsAt * 1000).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}에 충전` : ''}` : '아직 측정 전'],
     ['사무실 폴더', dir ? tilde(dir) : '—'],
@@ -224,7 +224,7 @@ function MachineRoom() {
       <dl className="kv">{rows.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
       <section className="room-sec">
         <h4>어떻게 작동하나요</h4>
-        <p className="small">강지영은 미션 폴더에서 창 없이 실행되는 진짜 Claude Code 세션이에요. 팀원들은 진짜 Claude Code 서브에이전트예요. 각자 지시사항이 있고, 자기 일에 맞는 도구만 써요. 에이전트가 도구를 쓸 때마다(검색, 페이지 읽기, 파일 쓰기) Claude Code가 사무실에 알려 주고, 사무실은 바로 보여 줘요. 타자 치는 로봇, 말풍선, 팀장 책상 위의 보고서처럼요.</p>
+        <p className="small">관우는 미션 폴더에서 창 없이 실행되는 진짜 Claude Code 세션이에요. 팀원들은 진짜 Claude Code 서브에이전트예요. 각자 지시사항이 있고, 자기 일에 맞는 도구만 써요. 에이전트가 도구를 쓸 때마다(검색, 페이지 읽기, 파일 쓰기) Claude Code가 사무실에 알려 주고, 사무실은 바로 보여 줘요. 타자 치는 로봇, 말풍선, 팀장 책상 위의 보고서처럼요.</p>
         <p className="small muted">제한 모드: 팀은 미션 폴더 밖으로 절대 나가지 않아요. 내 설정이나 다른 에이전트도 사무실에 들어오지 않아요.</p>
       </section>
     </Shell>
@@ -283,7 +283,7 @@ function TeamRoom({ role }: { role?: Role }) {
   const [open, setOpen] = useState<string | null>(null);
   useEffect(() => { if (tab === 'history' && connection === 'live') send({ t: 'team_history' }); }, [tab, connection, send]);
   const working = (r: Role) => [...world.actors.values()].filter((a) => a.role === r && a.seated).length;
-  const roles: Role[] = ['chef', 'recherche', 'code', 'design', 'redaction', 'analyse'];
+  const roles: Role[] = ['chef', 'recherche', 'code', 'design', 'redaction', 'analyse', 'verif'];
   const missions = useMemo(() => {
     const m = new Map<string, { title: string; at: number; entries: NonNullable<typeof history> }>();
     for (const e of history ?? []) {
@@ -310,12 +310,12 @@ function TeamRoom({ role }: { role?: Role }) {
             </button>
           ))}
         </div>
-      ) : <p className="muted">아직 사무실에 아무도 없어요. 강지영에게 미션을 주면 알맞은 에이전트를 불러요.</p>)}
+      ) : <p className="muted">아직 사무실에 아무도 없어요. 관우에게 미션을 주면 알맞은 에이전트를 불러요.</p>)}
       {tab === 'roles' && (
         <div className="roles">
           {roles.map((r) => (
             <div key={r} className={`role-card ${role === r ? 'focus' : ''}`} style={{ ['--c' as string]: ROLES[r].color }}>
-              <div className="role-head"><Avatar role={r} size={34} /><div><b>{ROLES[r].icon} {ROLES[r].label}</b><span>{r === 'chef' ? '강지영' : `에이전트 「${ROLES[r].type}」`} · 두뇌: {r === 'chef' ? settings.chefModel || '기본값' : settings.teamModel === 'inherit' ? '강지영과 같아요' : settings.teamModel}</span></div>{working(r) > 0 && <em>{working(r)}명 작업 중</em>}</div>
+              <div className="role-head"><Avatar role={r} size={34} /><div><b>{ROLES[r].icon} {ROLES[r].label}</b><span>{r === 'chef' ? '관우' : `에이전트 「${ROLES[r].type}」`} · 두뇌: {r === 'chef' ? settings.chefModel || '기본값' : settings.teamModel === 'inherit' ? '관우와 같아요' : settings.teamModel}</span></div>{working(r) > 0 && <em>{working(r)}명 작업 중</em>}</div>
               <p>{ROLES[r].what}</p>
               <div className="tools">{ROLE_TOOLS[r].map((t) => <span key={t} title={TOOL_INFO[t] ?? t}>{t}<small>{TOOL_INFO[t] ?? ''}</small></span>)}</div>
             </div>
@@ -376,7 +376,7 @@ export function FileActions({ files, missionId, disabled, send }: { files: Retur
           <span className="file-icon">{fileIcon(f.ext)}</span>
           <div className="file-id">
             <b title={f.path}>{f.name}</b>
-            <span className="small muted">{fmtSize(f.size)} · 만든 사람: {f.by === 'chef' ? '강지영' : agents[f.by]?.name ?? '팀'}</span>
+            <span className="small muted">{fmtSize(f.size)} · 만든 사람: {f.by === 'chef' ? '관우' : agents[f.by]?.name ?? '팀'}</span>
           </div>
           {!disabled && (f.ext === 'html' || f.ext === 'htm') && (
             <button className="btn small primary" onClick={() => { sfx('open'); useOffice.setState({ modal: { kind: 'preview', missionId, file: f.path } }); }}>사이트 보기</button>
